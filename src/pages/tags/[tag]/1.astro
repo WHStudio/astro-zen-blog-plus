@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import { getAllTags } from '../../../utils/posts';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const tags = getAllTags(posts);
+  
+  return tags.map(tag => ({
+    params: { tag }
+  }));
+}
+
+const { tag } = Astro.params;
+
+// 重定向到不带页码的标签页面
+// 对中文标签进行 URL 编码
+const encodedTag = encodeURIComponent(tag);
+return Astro.redirect(`/tags/${encodedTag}`, 301);
+---

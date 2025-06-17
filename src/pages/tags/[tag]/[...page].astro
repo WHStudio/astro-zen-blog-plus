@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogPreview from '../../../components/BlogPreview.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+import { getAllTags, getPostsByTag, sortPostsByDate } from '../../../utils/posts';
+
+export async function getStaticPaths({ paginate }) {
+  const posts = await getCollection('blog');
+  const tags = getAllTags(posts);
+
+  const paths = [];
+  
+  tags.forEach((tag) => {
+    const filteredPosts = getPostsByTag(posts, tag);
+    const sortedPosts = sortPostsByDate(filteredPosts);
+    
+    // 为每个标签创建分页
+    const paginatedPaths = paginate(sortedPosts, { 
+      pageSize: 10,
+      params: { tag },
+      props: { tag }
+    });
+    paths.push(...paginatedPaths);
+  });
+
+  return paths;
+}
+
+const { page } = Astro.props;
+const { tag } = Astro.params;
+---
+
+<BaseLayout title={`包含 ${tag} 标签的博客`}>
+  <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">包含 {tag} 标签的博客</h1>
+  <section>
+    {page.data.map((post) => <BlogPreview post={post} />)}
+  </section>  <Pagination
+    currentPage={page.currentPage}
+    totalPages={page.lastPage}
+    baseUrl={`/tags/${encodeURIComponent(tag)}/`}
+  />
+</BaseLayout>

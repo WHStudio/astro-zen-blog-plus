@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogPreview from '../../components/BlogPreview.astro';
+import Pagination from '../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+import { filterPublishedPosts, sortPostsByDate } from '../../utils/posts';
+
+const posts = await getCollection('blog');
+const publishedPosts = filterPublishedPosts(posts);
+const sortedPosts = sortPostsByDate(publishedPosts);
+
+const pageSize = 10;
+const totalPages = Math.ceil(sortedPosts.length / pageSize);
+const currentPagePosts = sortedPosts.slice(0, pageSize);
+---
+
+<BaseLayout title="博客列表">
+  <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">博客列表</h1>
+  <section>
+    {currentPagePosts.map((post) => <BlogPreview post={post} />)}
+  </section> {totalPages > 1 && (
+    <Pagination
+      currentPage={1}
+      totalPages={totalPages}
+      baseUrl="/blog/"
+    />
+  )}
+</BaseLayout>

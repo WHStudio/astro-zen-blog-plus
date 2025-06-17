@@ -1,0 +1,35 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BlogPreview from '../../components/BlogPreview.astro';
+import Pagination from '../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+import { filterPublishedPosts, sortPostsByDate } from '../../utils/posts';
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const posts = await getCollection('blog');
+  const publishedPosts = filterPublishedPosts(posts);
+  const sortedPosts = sortPostsByDate(publishedPosts);
+
+  return paginate(sortedPosts, { pageSize: 10 });
+}
+
+interface Props {
+  page: Page<CollectionEntry<'blog'>>;
+}
+
+const { page } = Astro.props as Props;
+---
+
+<BaseLayout title="博客列表">
+  <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">博客列表</h1>
+  <section>
+    {page.data.map((post) => <BlogPreview post={post} />)}
+  </section>
+  <Pagination
+    currentPage={page.currentPage}
+    totalPages={page.lastPage}
+    baseUrl="/blog/"
+  />
+</BaseLayout>

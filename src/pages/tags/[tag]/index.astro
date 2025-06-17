@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogPreview from '../../../components/BlogPreview.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+import { getAllTags, getPostsByTag, sortPostsByDate } from '../../../utils/posts';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const tags = getAllTags(posts);
+
+  return tags.map((tag) => {
+    const filteredPosts = getPostsByTag(posts, tag);
+    const sortedPosts = sortPostsByDate(filteredPosts);
+    
+    return {
+      params: { tag },
+      props: { 
+        posts: sortedPosts,
+        tag
+      }
+    };
+  });
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+
+const pageSize = 10;
+const totalPages = Math.ceil(posts.length / pageSize);
+const currentPagePosts = posts.slice(0, pageSize);
+---
+
+<BaseLayout title={`包含 ${tag} 标签的博客`}>
+  <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">包含 {tag} 标签的博客</h1>
+  <section>
+    {currentPagePosts.map((post) => <BlogPreview post={post} />)}
+  </section>  {totalPages > 1 && (
+    <Pagination
+      currentPage={1}
+      totalPages={totalPages}
+      baseUrl={`/tags/${encodeURIComponent(tag)}/`}
+    />
+  )}
+</BaseLayout>

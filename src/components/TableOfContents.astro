@@ -1,0 +1,237 @@
+---
+interface Props {
+  headings: Array<{
+    depth: number;
+    slug: string;
+    text: string;
+  }>;
+}
+
+const { headings } = Astro.props;
+
+// 过滤掉 Footnotes 标题
+const filteredHeadings = headings?.filter(heading => 
+  heading.text !== 'Footnotes' && 
+  heading.slug !== 'footnotes'
+) || [];
+
+// 如果没有标题，则不渲染
+if (!filteredHeadings || filteredHeadings.length === 0) {
+  return null;
+}
+---
+
+<!-- 目录切换按钮 -->
+<button
+  id="toc-toggle"
+  class="toc-toggle fixed right-0 top-1/2 transform -translate-y-1/2 z-50 bg-gray-800/90 dark:bg-gray-700/90 backdrop-blur-sm text-white rounded-l-md shadow-lg hover:bg-gray-700/95 dark:hover:bg-gray-600/95 border-l border-t border-b border-gray-600/50"
+  style="padding: 1rem 0.5rem;"
+  aria-label="切换目录"
+  title="目录"
+>
+  <svg
+    id="toc-icon"
+    class="w-4 h-4 transform transition-transform duration-300"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+  </svg>
+</button>
+
+<!-- 目录面板 -->
+<nav
+  id="toc-panel"
+  class="toc-panel custom-scrollbar fixed z-40 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl p-4 transform translate-x-full max-h-[70vh] overflow-y-auto opacity-0"
+  style="right: 0; top: 50%; transform: translateY(-50%) translateX(100%); max-width: calc(100vw - 2rem);"
+><h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 pb-2">
+    目录
+  </h3>
+  <ul class="space-y-2">
+    {filteredHeadings.map((heading) => (
+      <li
+        class={`toc-item ${
+          heading.depth === 1 ? 'ml-0' :
+          heading.depth === 2 ? 'ml-3' :
+          heading.depth === 3 ? 'ml-6' :
+          heading.depth === 4 ? 'ml-9' :
+          heading.depth === 5 ? 'ml-12' :
+          'ml-15'
+        }`}
+      >
+        <a
+          href={`#${heading.slug}`}
+          class={`block text-sm hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 ${
+            heading.depth === 1 ? 'font-semibold text-gray-900 dark:text-gray-100' :
+            heading.depth === 2 ? 'font-medium text-gray-800 dark:text-gray-200' :
+            'text-gray-700 dark:text-gray-300'
+          }`}
+          data-heading-id={heading.slug}
+        >
+          {heading.text}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<script>
+  function initTableOfContents() {
+    const toggleButton = document.getElementById('toc-toggle');
+    const tocPanel = document.getElementById('toc-panel');
+    const tocIcon = document.getElementById('toc-icon');
+    
+    if (!toggleButton || !tocPanel || !tocIcon) return;
+
+    let isOpen = false;    // 检测屏幕尺寸并调整样式
+    function adjustTocPosition() {
+      const isDesktop = window.innerWidth >= 1024; // lg breakpoint
+      
+      if (isDesktop) {
+        // 大屏幕：显示在右侧，完全隐藏/显示
+        tocPanel.style.right = '0.5rem';
+        tocPanel.style.left = 'auto';
+        tocPanel.style.width = '280px';
+        
+        if (isOpen) {
+          tocPanel.style.transform = 'translateY(-50%) translateX(0)';
+          tocPanel.style.opacity = '1';
+          tocPanel.style.visibility = 'visible';
+        } else {
+          tocPanel.style.transform = 'translateY(-50%) translateX(100%)';
+          tocPanel.style.opacity = '0';
+          tocPanel.style.visibility = 'hidden';
+        }
+      } else {
+        // 小屏幕：居中显示
+        tocPanel.style.left = '50%';
+        tocPanel.style.right = 'auto';
+        tocPanel.style.width = 'calc(100vw - 2rem)';
+        tocPanel.style.maxWidth = '320px';
+        tocPanel.style.visibility = 'visible';
+        
+        if (isOpen) {
+          tocPanel.style.transform = 'translateY(-50%) translateX(-50%)';
+          tocPanel.style.opacity = '1';
+        } else {
+          tocPanel.style.transform = 'translateY(-50%) translateX(150%)';
+          tocPanel.style.opacity = '0';
+        }
+      }
+    }
+
+    // 切换目录显示
+    function toggleToc() {
+      isOpen = !isOpen;
+      adjustTocPosition();
+      
+      // 旋转图标
+      if (isOpen) {
+        tocIcon.style.transform = 'rotate(180deg)';
+      } else {
+        tocIcon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // 平滑滚动到标题
+    function scrollToHeading(event) {
+      event.preventDefault();
+      const target = event.target;
+      const headingId = target.getAttribute('data-heading-id');
+      
+      if (headingId) {
+        const heading = document.getElementById(headingId);
+        if (heading) {
+          heading.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+          
+          // 在移动端点击后自动关闭目录
+          if (window.innerWidth < 1024) {
+            setTimeout(() => {
+              isOpen = false;
+              adjustTocPosition();
+              tocIcon.style.transform = 'rotate(0deg)';
+            }, 300);
+          }
+        }
+      }
+    }
+
+    // 高亮当前标题
+    function highlightCurrentHeading() {
+      const headings = Array.from(document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id]'));
+      const tocLinks = Array.from(document.querySelectorAll('[data-heading-id]'));
+      
+      let currentHeading = null;
+      const scrollPosition = window.scrollY + 100; // 偏移量
+        // 找到当前可见的标题
+      for (let i = headings.length - 1; i >= 0; i--) {
+        const heading = headings[i];
+        if (heading && heading instanceof HTMLElement && heading.offsetTop <= scrollPosition) {
+          currentHeading = heading;
+          break;
+        }
+      }
+      
+      // 更新高亮状态
+      tocLinks.forEach(link => {
+        link.classList.remove('text-primary-600', 'dark:text-primary-400', 'bg-primary-100', 'dark:bg-primary-900/50', 'font-bold');
+        link.classList.add('text-gray-700', 'dark:text-gray-300');
+        if (link instanceof HTMLElement) {
+          link.style.borderLeft = '';
+        }
+      });
+      
+      if (currentHeading) {
+        const currentLink = document.querySelector(`[data-heading-id="${currentHeading.id}"]`);
+        if (currentLink) {
+          currentLink.classList.remove('text-gray-700', 'dark:text-gray-300');
+          currentLink.classList.add('text-primary-600', 'dark:text-primary-400', 'bg-primary-100', 'dark:bg-primary-900/50', 'font-bold');
+        }
+      }
+    }
+
+    // 事件监听
+    toggleButton.addEventListener('click', toggleToc);
+    window.addEventListener('resize', adjustTocPosition);
+    window.addEventListener('scroll', highlightCurrentHeading);
+    
+    // 为所有目录链接添加点击事件
+    const tocLinks = document.querySelectorAll('[data-heading-id]');
+    tocLinks.forEach(link => {
+      link.addEventListener('click', scrollToHeading);
+    });
+
+    // 初始化位置
+    adjustTocPosition();
+    highlightCurrentHeading();
+
+    // 点击外部区域关闭目录（仅在移动端）
+    document.addEventListener('click', (event) => {
+      if (window.innerWidth < 1024 && isOpen) {
+        const target = event.target;
+        if (target && target instanceof Node && !tocPanel.contains(target) && !toggleButton.contains(target)) {
+          isOpen = false;
+          adjustTocPosition();
+          tocIcon.style.transform = 'rotate(0deg)';
+        }
+      }
+    });
+  }
+
+  // 页面加载时初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTableOfContents);
+  } else {
+    initTableOfContents();
+  }
+  
+  // 支持 Astro 的客户端路由
+  document.addEventListener('astro:page-load', initTableOfContents);
+</script>
+
+

@@ -1,0 +1,414 @@
+/* =============================================================================
+   工具类样式 - Utility Classes
+   包含：通用工具类、辅助样式、动画类
+   ============================================================================= */
+
+/* =============================================================================
+   动画工具类
+   ============================================================================= */
+
+/* 淡入动画 */
+.animate-fade-in {
+  animation: fade-in var(--transition-normal) ease-out;
+}
+
+.animate-fade-in-slow {
+  animation: fade-in var(--transition-slow) ease-out;
+}
+
+/* 滑入动画 */
+.animate-slide-up {
+  animation: slide-up var(--transition-normal) ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down var(--transition-normal) ease-out;
+}
+
+/* 延迟动画 */
+.animate-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animate-delay-300 {
+  animation-delay: 0.3s;
+}
+
+/* =============================================================================
+   过渡工具类
+   ============================================================================= */
+
+.transition-fast {
+  transition: all var(--transition-fast);
+}
+
+.transition-normal {
+  transition: all var(--transition-normal);
+}
+
+.transition-slow {
+  transition: all var(--transition-slow);
+}
+
+.transition-colors {
+  transition: color var(--transition-normal), background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+.transition-opacity {
+  transition: opacity var(--transition-normal);
+}
+
+.transition-transform {
+  transition: transform var(--transition-normal);
+}
+
+/* =============================================================================
+   交互工具类
+   ============================================================================= */
+
+/* 悬停效果 */
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-opacity:hover {
+  opacity: 0.8;
+}
+
+.hover-shadow:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* 聚焦样式 */
+.focus-ring:focus {
+  outline: 2px solid rgb(59, 130, 246);
+  outline-offset: 2px;
+}
+
+.focus-ring:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* =============================================================================
+   状态工具类
+   ============================================================================= */
+
+/* 加载状态 */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* 禁用状态 */
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* 激活状态 */
+.active {
+  background-color: rgb(59, 130, 246);
+  color: white;
+}
+
+.dark .active {
+  background-color: rgb(96, 165, 250);
+  color: rgb(17, 24, 39);
+}
+
+/* =============================================================================
+   布局工具类
+   ============================================================================= */
+
+/* 居中 */
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center-x {
+  display: flex;
+  justify-content: center;
+}
+
+.center-y {
+  display: flex;
+  align-items: center;
+}
+
+/* 间距 */
+.space-x-sm > * + * {
+  margin-left: var(--spacing-sm);
+}
+
+.space-x-md > * + * {
+  margin-left: var(--spacing-md);
+}
+
+.space-x-lg > * + * {
+  margin-left: var(--spacing-lg);
+}
+
+.space-y-sm > * + * {
+  margin-top: var(--spacing-sm);
+}
+
+.space-y-md > * + * {
+  margin-top: var(--spacing-md);
+}
+
+.space-y-lg > * + * {
+  margin-top: var(--spacing-lg);
+}
+
+/* =============================================================================
+   视觉效果工具类
+   ============================================================================= */
+
+/* 阴影 */
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+
+/* 圆角 */
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* 边框 */
+.border {
+  border: 1px solid var(--color-border);
+}
+
+.dark .border {
+  border-color: var(--color-border-dark);
+}
+
+.border-t {
+  border-top: 1px solid var(--color-border);
+}
+
+.dark .border-t {
+  border-top-color: var(--color-border-dark);
+}
+
+.border-b {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dark .border-b {
+  border-bottom-color: var(--color-border-dark);
+}
+
+/* =============================================================================
+   文本工具类
+   ============================================================================= */
+
+/* 文本颜色 */
+.text-primary {
+  color: var(--color-text);
+}
+
+.dark .text-primary {
+  color: var(--color-text-dark);
+}
+
+.text-secondary {
+  color: var(--color-text-light);
+}
+
+.dark .text-secondary {
+  color: var(--color-text-light-dark);
+}
+
+.text-accent {
+  color: rgb(59, 130, 246);
+}
+
+.dark .text-accent {
+  color: rgb(96, 165, 250);
+}
+
+/* 文本对齐 */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* 文本大小 */
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+/* 字重 */
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* =============================================================================
+   背景工具类
+   ============================================================================= */
+
+.bg-primary {
+  background-color: var(--color-bg);
+}
+
+.dark .bg-primary {
+  background-color: var(--color-bg-dark);
+}
+
+.bg-secondary {
+  background-color: var(--color-bg-secondary);
+}
+
+.dark .bg-secondary {
+  background-color: var(--color-bg-secondary-dark);
+}
+
+/* =============================================================================
+   显示/隐藏工具类
+   ============================================================================= */
+
+.hidden {
+  display: none;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.opacity-0 {
+  opacity: 0;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-100 {
+  opacity: 1;
+}
+
+/* =============================================================================
+   响应式工具类
+   ============================================================================= */
+
+@media (max-width: 640px) {
+  .sm\:hidden {
+    display: none;
+  }
+  
+  .sm\:block {
+    display: block;
+  }
+  
+  .sm\:text-sm {
+    font-size: 0.875rem;
+  }
+  
+  .sm\:space-x-sm > * + * {
+    margin-left: var(--spacing-sm);
+  }
+}
+
+@media (min-width: 768px) {
+  .md\:block {
+    display: block;
+  }
+  
+  .md\:hidden {
+    display: none;
+  }
+  
+  .md\:text-base {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:block {
+    display: block;
+  }
+  
+  .lg\:hidden {
+    display: none;
+  }
+  
+  .lg\:text-lg {
+    font-size: 1.125rem;
+  }
+}

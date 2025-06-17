@@ -1,0 +1,73 @@
+---
+interface Props {
+  date: Date;
+  showTime?: boolean;
+  short?: boolean;
+  hideYear?: boolean;
+}
+
+const { date, showTime = false, short = false, hideYear = false } = Astro.props;
+---
+
+<time 
+  datetime={date.toISOString()} 
+  class="text-gray-600 dark:text-gray-400" 
+  data-show-time={showTime} 
+  data-short={short}
+  data-hide-year={hideYear}
+>
+  {date.toISOString()}
+</time>
+
+<script>
+  import { formatDate, formatDateWithoutYear, formatDateTime, formatDateTimeWithoutYear, formatDateTimeShort } from '../utils/date';
+  
+  function formatLocalDate() {
+    const timeElements = document.querySelectorAll('time[datetime]');
+    
+    timeElements.forEach(element => {
+      const datetime = element.getAttribute('datetime');
+      const showTime = element.getAttribute('data-show-time') === 'true';
+      const isShort = element.getAttribute('data-short') === 'true';
+      const hideYear = element.getAttribute('data-hide-year') === 'true';
+      
+      if (datetime) {
+        const date = new Date(datetime);
+        
+        if (showTime) {
+          if (hideYear) {
+            // 带时间但不显示年份
+            element.textContent = formatDateTimeWithoutYear(date);
+          } else if (isShort) {
+            // 简短格式
+            element.textContent = formatDateTimeShort(date);
+          } else {
+            // 完整时间格式
+            element.textContent = formatDateTime(date);
+          }
+        } else {
+          if (hideYear) {
+            // 只显示月日，不显示年份
+            element.textContent = formatDateWithoutYear(date);
+          } else {
+            // 显示完整日期
+            element.textContent = formatDate(date);
+          }
+        }
+        
+        // 设置 title 为完整的时间信息
+        element.setAttribute('title', formatDateTime(date));
+      }
+    });
+  }
+
+  // 页面加载完成后格式化日期
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', formatLocalDate);
+  } else {
+    formatLocalDate();
+  }
+
+  // 为了支持 Astro 的页面导航，也在视图转换时格式化
+  document.addEventListener('astro:page-load', formatLocalDate);
+</script>
