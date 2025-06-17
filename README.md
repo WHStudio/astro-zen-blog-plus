@@ -4,7 +4,7 @@
 
 如果您觉得这个项目有帮助，请考虑给原作者和我点个star⭐️。
 
-[新版项目首页](https://github.com/WHStudio/astro-zen-blog-plus)
+[Demo](https://azbp.netlify.app/)
 
 [原版REAMDE](https://github.com/larry-xue/astro-zen-blog/blob/main/docs/README_CN.md)
 
