@@ -12,7 +12,7 @@ image: ""
 
 如果您觉得这个项目有帮助，请考虑给原作者和我点个star⭐️。
 
-[新版项目首页](https://github.com/WHStudio/astro-zen-blog-plus)
+[Demo](https://azbp.netlify.app/)
 
 [原版REAMDE](https://github.com/larry-xue/astro-zen-blog/blob/main/docs/README_CN.md)
 
@@ -27,6 +27,16 @@ image: ""
 - ✒️ 更好的 Markdown 和 LaTeX 支持
 - 🚮 移除 RSS 和 Google Analysis
 - 💡 更多惊喜...
+
+## 性能展示
+
+由[PageSpeed Insights](https://pagespeed.web.dev/)提供支持
+
+**四项全满，快如闪电！**
+
+![mobile](https://290f154.webp.li/202506150505513.png)
+
+![desktop](https://290f154.webp.li/202506150507214.png)
 
 ## 安装和调试
 
@@ -96,7 +106,22 @@ pnpm new-post 文件名
    pnpm build
    ```
 
-2. 或者 无服务器部署：
+   参考Caddyfile配置：
+   ```caddyfile
+   blog.example.com {
+     root * /var/www/blog/dist
+     file_server
+     tls abcd@mail.com
+     encode gzip
+     handle_errors {
+       rewrite * /404.html
+       templates
+       file_server
+     }
+   }
+   ```
+
+3. 或者 无服务器部署：
 
    构建命令 `pnpm build`，输出 `dist`。
 
@@ -109,3 +134,4 @@ pnpm new-post 文件名
 ## 许可证
 
 该项目基于 MIT 许可证 - 查看 LICENSE 文件了解详情。
+
