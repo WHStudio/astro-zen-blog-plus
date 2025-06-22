@@ -98,7 +98,22 @@ pnpm new-post 文件名
    pnpm build
    ```
 
-2. 或者 无服务器部署：
+   参考Caddyfile配置：
+   ```caddyfile
+   blog.example.com {
+     root * /var/www/blog/dist
+     file_server
+     tls abcd@mail.com
+     encode gzip
+     handle_errors {
+       rewrite * /404.html
+       templates
+       file_server
+     }
+   }
+   ```
+
+3. 或者 无服务器部署：
 
    构建命令 `pnpm build`，输出 `dist`。
 
