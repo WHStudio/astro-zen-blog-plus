@@ -9,18 +9,22 @@ if (!filename) {
     process.exit(1);
 }
 
-const date = new Date().toISOString().split('T')[0];
+// 获取当前UTC时间，精确到分钟
+const now = new Date();
+const date = now.toISOString().slice(0, 16) + ':00.000Z'; // 格式: YYYY-MM-DDTHH:MM:00.000Z
 const postPath = path.join('src', 'content', 'blog', `${filename}.md`);
 
 const content = `---
-title: Your Title Here
-description: Add your description here
-date: ${date}
+title: 标题
+description: 在此处添加描述
+created: ${date}
+updated: ${date}
 tags: []
-draft: true
+image: ""
+hidden: false
 ---
 
-Write your content here...
+在此处写入内容...
 `;
 
 fs.mkdirSync(path.dirname(postPath), { recursive: true });

@@ -5,7 +5,7 @@ export async function GET() {
   
   const searchData = await Promise.all(
     posts.map(async (post) => {
-      if (post.data.draft) {
+      if (post.data.hidden) {
         return null;
       }
 
@@ -19,7 +19,7 @@ export async function GET() {
         title: post.data.title,
         description: post.data.description,
         tags: post.data.tags,
-        slug: post.slug,
+        slug: post.id,
         content: cleanContent,
       };
     })

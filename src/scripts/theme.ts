@@ -16,7 +16,9 @@ const initTheme = () => {
     document.documentElement.classList.add('dark');
   }
 
-  window.localStorage.setItem('theme', theme);
+  if (typeof localStorage !== 'undefined') {
+    window.localStorage.setItem('theme', theme);
+  }
 };
 
 const handleToggleClick = () => {
@@ -24,7 +26,9 @@ const handleToggleClick = () => {
   element.classList.toggle('dark');
 
   const isDark = element.classList.contains('dark');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
 };
 
 // Initialize theme on page load

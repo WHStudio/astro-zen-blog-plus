@@ -1,3 +1,5 @@
+import typography from '@tailwindcss/typography';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
@@ -35,12 +37,15 @@ export default {
                 color: 'rgb(29, 78, 216)',
               },
             },
-            code: {
-              color: 'rgb(31, 41, 55)',
-              backgroundColor: 'rgb(243, 244, 246)',
-              padding: '0.2em 0.4em',
-              borderRadius: '0.25rem',
-              fontWeight: '400',
+            // 表格对齐样式
+            'table th[align="left"], table td[align="left"]': {
+              textAlign: 'left',
+            },
+            'table th[align="center"], table td[align="center"]': {
+              textAlign: 'center',
+            },
+            'table th[align="right"], table td[align="right"]': {
+              textAlign: 'right',
             },
           },
         },
@@ -56,13 +61,34 @@ export default {
                 color: 'rgb(147, 197, 253)',
               },
             },
-            code: {
-              color: 'rgb(243, 244, 246)',
-              backgroundColor: 'rgb(31, 41, 55)',
-            },
             blockquote: {
               color: 'rgb(229, 231, 235)',
               borderLeftColor: 'rgb(75, 85, 99)',
+            },
+            table: {
+              color: 'rgb(229, 231, 235)',
+            },
+            'thead th': {
+              color: 'rgb(243, 244, 246)',
+              borderBottomColor: 'rgb(75, 85, 99)',
+            },
+            'tbody tr': {
+              borderBottomColor: 'rgb(75, 85, 99)',
+            },
+            'tbody tr:hover': {
+              backgroundColor: 'rgb(31, 41, 55)',
+            },
+            'tbody td': {
+              color: 'rgb(229, 231, 235)',
+            },
+            strong: {
+              color: 'rgb(243, 244, 246)',
+            },
+            'ul li': {
+              color: 'rgb(229, 231, 235)',
+            },
+            'ol li': {
+              color: 'rgb(229, 231, 235)',
             },
           },
         },
@@ -70,6 +96,6 @@ export default {
     },
   },
   plugins: [
-    require('@tailwindcss/typography'),
+    typography,
   ],
 }

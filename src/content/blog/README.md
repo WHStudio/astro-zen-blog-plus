@@ -1,4 +1,12 @@
-# Astro Zen Blog Plus
+---
+title: Astro Zen Blog Plus
+description: 项目介绍
+created: 2025-06-17T18:00:00.000Z
+updated: 2026-05-09T21:20:00.000Z
+tags: [关于]
+hidden: false
+image: "https://290f154.webp.li/202506170111213.png"
+---
 
 基于[Astro Zen Blog](https://github.com/larry-xue/astro-zen-blog)主题的汉化，并对部分功能进行改进。
 
@@ -6,7 +14,7 @@
 
 [Demo](https://azbp.netlify.app/)
 
-[原版REAMDE](https://github.com/larry-xue/astro-zen-blog/blob/main/docs/README_CN.md)
+[REAMDE](https://github.com/WHStudio/astro-zen-blog-plus/blob/main/README.md)
 
 ## 功能改进
 

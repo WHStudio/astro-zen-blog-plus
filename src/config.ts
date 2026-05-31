@@ -9,29 +9,26 @@ export interface SiteConfig {
     github?: string;
     linkedin?: string;
     email?: string;
-    rss?: boolean;
   };
   homepage: PostFilter;
-  googleAnalysis?: string;
   search?: boolean;
 }
 
 export const siteConfig: SiteConfig = {
-  site: "https://example.com/", // your site url
-  title: "Your's blog",
-  slogan: "Exploring the World with Code",
-  description: "write a description here",
+  site: "https://example.com/", // 您的网站 URL
+  title: "您的博客",
+  slogan: "探索世界与自我",
+  description: "在这里写描述",
   social: {
-    github: "https://github.com/larry-xue/astro-zen-blog", // leave empty if you don't want to show the github
-    linkedin: "https://www.linkedin.com/in/someone/", // leave empty if you don't want to show the linkedin
-    email: "example@gmail.com", // leave empty if you don't want to show the email
-    rss: true, // set this to false if you don't want to provide an rss feed
+    // 原版集成的一些联系方式, 不需要则留空
+    github: "https://github.com/username",
+    linkedin: "https://www.linkedin.com/in/username",
+    email: "your@email.com",
   },
   homepage: {
-    maxPosts: 5,
-    tags: [],
-    excludeTags: [],
+    maxPosts: 5, // 主页显示的最大文章数量
+    tags: [], // 仅显示包含这些标签的文章
+    excludeTags: [], // 排除包含这些标签的文章
   },
-  googleAnalysis: "", // your google analysis id
-  search: true, // set this to false if you don't want to provide a search feature
+  search: true, // 启用本地搜索
 };

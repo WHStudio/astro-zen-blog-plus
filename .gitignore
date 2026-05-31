@@ -1,6 +1,9 @@
 # build output
 dist/
 
+# compressed archive
+dist.zip
+
 # generated types
 .astro/
 
@@ -22,3 +25,12 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# tar.gz
+*.tar.gz
+
+# .claude
+.claude/
+
+# .vscode
+.vscode/

@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BlogPreview from '../../../components/BlogPreview.astro';
+import Pagination from '../../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import { getAllTags, getPostsByTag, sortPostsByDate } from '../../../utils/posts';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const tags = getAllTags(posts);
+
+  const pageSize = 10;
+  const paths = [];
+
+  tags.forEach((tag) => {
+    const filteredPosts = getPostsByTag(posts, tag);
+    const sortedPosts = sortPostsByDate(filteredPosts);
+    const totalPages = Math.ceil(sortedPosts.length / pageSize);
+
+    // /tags/:tag (page 1)
+    paths.push({
+      params: { tag, page: undefined },
+      props: {
+        posts: sortedPosts.slice(0, pageSize),
+        currentPage: 1,
+        totalPages,
+        tag,
+      },
+    });
+
+    // /tags/:tag/1 → 301 redirect to /tags/:tag
+    paths.push({
+      params: { tag, page: '1' },
+      props: { redirect: `/tags/${encodeURIComponent(tag)}` },
+    });
+
+    // /tags/:tag/2, /tags/:tag/3, ...
+    for (let i = 2; i <= totalPages; i++) {
+      const start = (i - 1) * pageSize;
+      paths.push({
+        params: { tag, page: String(i) },
+        props: {
+          posts: sortedPosts.slice(start, start + pageSize),
+          currentPage: i,
+          totalPages,
+          tag,
+        },
+      });
+    }
+  });
+
+  return paths;
+}
+
+interface Props {
+  redirect?: string;
+  posts?: CollectionEntry<'blog'>[];
+  currentPage?: number;
+  totalPages?: number;
+  tag?: string;
+}
+
+const { redirect, posts, currentPage, totalPages, tag } = Astro.props as Props;
+
+if (redirect) {
+  return Astro.redirect(redirect, 301);
+}
+---
+
+<BaseLayout title={`包含 ${tag} 标签的博客${currentPage > 1 ? ` - 第 ${currentPage} 页` : ''}`}>
+  <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">
+    包含 {tag} 标签的博客{currentPage > 1 && ` - 第 ${currentPage} 页`}
+  </h1>
+  <section>
+    {posts.map((post) => <BlogPreview post={post} />)}
+  </section>
+  <Pagination
+    currentPage={currentPage}
+    totalPages={totalPages}
+    baseUrl={`/tags/${encodeURIComponent(tag)}/`}
+  />
+</BaseLayout>

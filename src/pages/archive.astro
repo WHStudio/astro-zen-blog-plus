@@ -10,7 +10,7 @@ const sortedPosts = sortPostsByDate(publishedPosts);
 
 // Group posts by year
 const postsByYear = sortedPosts.reduce((acc, post) => {
-  const year = post.data.date.getFullYear();
+  const year = post.data.created.getFullYear();
   if (!acc[year]) {
     acc[year] = [];
   }
@@ -21,8 +21,8 @@ const postsByYear = sortedPosts.reduce((acc, post) => {
 const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
 ---
 
-<BaseLayout title="Archive">
-  <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">Archive</h1>
+<BaseLayout title="归档">
+  <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">归档</h1>
   
   {years.map(year => (
     <section class="mb-12">
@@ -31,10 +31,10 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
         {postsByYear[year].map(post => (
           <li class="flex items-baseline gap-4">
             <span class="text-sm whitespace-nowrap">
-              <PostDate date={post.data.date} />
+              <PostDate date={post.data.created} hideYear={true} />
             </span>
             <a 
-              href={`/blog/${post.slug}`}
+              href={`/blog/${post.id}`}
               class="text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400"
             >
               {post.data.title}

@@ -1,0 +1,31 @@
+/* =============================================================================
+   Tailwind CSS v4 - CSS-first configuration
+   ============================================================================= */
+
+@import "tailwindcss";
+
+/* Class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Typography plugin */
+@plugin "@tailwindcss/typography";
+
+/* Custom theme - primary color palette */
+@theme {
+  --color-primary-50: #f2f8f3;
+  --color-primary-100: #e6f1e8;
+  --color-primary-200: #cde3d2;
+  --color-primary-300: #a7cbb0;
+  --color-primary-400: #7baf89;
+  --color-primary-500: #559469;
+  --color-primary-600: #437a54;
+  --color-primary-700: #366144;
+  --color-primary-800: #2c4d37;
+  --color-primary-900: #23402d;
+  --color-primary-950: #0d1911;
+}
+
+/* Custom styles in proper cascade layers */
+@import './base.css' layer(base);
+@import './components.css' layer(components);
+@import './utilities.css' layer(utilities);

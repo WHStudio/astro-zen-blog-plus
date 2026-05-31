@@ -1,0 +1,67 @@
+/* 导入 KaTeX 基础样式 */
+@import url('../../node_modules/katex/dist/katex.min.css');
+
+/* KaTeX 样式优化 */
+
+/* 确保数学公式在暗色模式下正确显示 */
+.dark .katex {
+  color: #e5e7eb;
+}
+
+.dark .katex .base {
+  color: #e5e7eb;
+}
+
+/* 行内公式样式 */
+.katex {
+  font-size: 1.1em;
+}
+
+/* 块级公式样式 */
+.katex-display {
+  margin: 1.5em 0;
+  text-align: center;
+}
+
+.katex-display > .katex {
+  text-align: center;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1em 0;
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .katex-display > .katex {
+    font-size: 1em;
+    padding: 0.5em 0;
+  }
+  
+  .katex {
+    font-size: 1em;
+  }
+}
+
+/* 确保数学公式不会与其他内容冲突 */
+.prose .katex-display {
+  margin: 1.5em 0;
+}
+
+.prose .katex {
+  white-space: nowrap;
+}
+
+/* 暗色模式下的特殊符号颜色 */
+.dark .katex .mord,
+.dark .katex .mbin,
+.dark .katex .mrel,
+.dark .katex .mop,
+.dark .katex .mpunct {
+  color: #e5e7eb;
+}
+
+/* 暗色模式下的数学符号 */
+.dark .katex .accent-body {
+  color: #e5e7eb;
+}
