@@ -39,9 +39,12 @@ assert.match(post, /name="description" content="支持的Markdown语法"/);
 assert.match(post, /property="og:type" content="article"/);
 assert.match(post, /上一篇|下一篇/);
 assert.match(post, /katex\.[^"]+\.css/);
+assert.match(post, /src="https:\/\/www\.todaybing\.com\/api\/today\/cn"/);
+assert.doesNotMatch(post, /__ASTRO_IMAGE_/);
 
 const readme = read('blog/readme/index.html');
 assert.doesNotMatch(readme, /katex\.[^"]+\.css/);
+assert.match(readme, /src="https:\/\/290f154\.webp\.li\/202506150505513\.png"/);
 
 assert.equal(exists('blog/hidden-example/index.html'), false);
 assert.equal(exists('blog/scheduled-future/index.html'), false);

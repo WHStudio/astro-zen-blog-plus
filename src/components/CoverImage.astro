@@ -17,10 +17,11 @@ interface Props {
 }
 
 const { src, alt, class: className, loading = 'lazy' } = Astro.props;
+const remote = typeof src === 'string';
 ---
 
-{typeof src === 'string' ? (
-  <Image src={src} alt={alt} inferSize loading={loading} decoding="async" class={className} />
+{remote ? (
+  <img src={src} alt={alt} loading={loading} decoding="async" class={className} />
 ) : (
   <Image src={src as ImageMetadata} alt={alt} loading={loading} decoding="async" class={className} />
 )}
