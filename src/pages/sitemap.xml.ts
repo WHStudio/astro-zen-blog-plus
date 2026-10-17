@@ -33,7 +33,7 @@ export const GET: APIRoute = async () => {
   ${publishedPosts.map(post => `
   <url>
     <loc>${site}/blog/${post.id}/</loc>
-    <lastmod>${post.data.updated.toISOString().split('T')[0]}</lastmod>
+    <lastmod>${(post.data.updated ?? post.data.created).toISOString().split('T')[0]}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>`).join('')}

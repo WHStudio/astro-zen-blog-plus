@@ -1,8 +1,9 @@
 
 const initTheme = () => {
   const theme = (() => {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-      return localStorage.getItem('theme');
+    const storedTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('theme') : null;
+    if (storedTheme) {
+      return storedTheme;
     }
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       return 'dark';

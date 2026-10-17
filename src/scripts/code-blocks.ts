@@ -9,6 +9,7 @@ async function copyToClipboard(text: string): Promise<boolean> {
     console.error('复制失败:', err);
     return false;
   }
+  return false;
 }
 
 // 创建复制按钮

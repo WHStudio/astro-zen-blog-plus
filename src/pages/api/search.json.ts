@@ -10,7 +10,7 @@ export async function GET() {
       }
 
       // Remove image paths from content
-      const cleanContent = post.body.replace(/!\[.*?\]\(.*?\)/g, '')  // Remove markdown images
+      const cleanContent = (post.body ?? '').replace(/!\[.*?\]\(.*?\)/g, '')  // Remove markdown images
         .replace(/<img[^>]*>/g, '')  // Remove HTML images
         .replace(/<(video|audio)[^>]*>.*?<\/(video|audio)>/gs, '')  // Remove video/audio tags
         .replace(/\.(png|jpg|jpeg|gif|webp|svg|avif|mp4|webm|mp3|wav|ogg)/gi, ''); // Remove media file extensions
