@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { filterPublishedPosts, sortPostsByDate } from '../utils/posts';
+import { getZonedYear } from '../utils/date';
+import { siteConfig } from '../config';
 import PostDate from '../components/PostDate.astro';
 
 const posts = await getCollection('blog');
@@ -10,7 +12,7 @@ const sortedPosts = sortPostsByDate(publishedPosts);
 
 // Group posts by year
 const postsByYear = sortedPosts.reduce((acc, post) => {
-  const year = post.data.created.getFullYear();
+  const year = getZonedYear(post.data.created, siteConfig.timezone);
   if (!acc[year]) {
     acc[year] = [];
   }
@@ -18,10 +20,10 @@ const postsByYear = sortedPosts.reduce((acc, post) => {
   return acc;
 }, {} as Record<number, typeof sortedPosts>);
 
-const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
+const years = Object.keys(postsByYear).map(Number).sort((a, b) => b - a);
 ---
 
-<BaseLayout title="归档">
+<BaseLayout title="归档" description="按年份浏览已发布的文章">
   <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">归档</h1>
   
   {years.map(year => (

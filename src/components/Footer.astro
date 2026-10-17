@@ -1,9 +1,10 @@
 ---
 import { siteConfig } from "../config";
+import { getZonedYear } from "../utils/date";
 
-const currentYear = new Date().getFullYear();
+const currentYear = getZonedYear(new Date(), siteConfig.timezone);
 ---
 
-<footer class="py-8 text-center text-gray-600 dark:text-gray-400">
+<footer transition:persist="site-footer" class="py-8 text-center text-gray-600 dark:text-gray-400">
   <p>&copy; {currentYear} {siteConfig.title}. All rights reserved.</p>
 </footer>

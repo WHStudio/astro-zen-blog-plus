@@ -9,18 +9,41 @@ const navItems = [
   { href: '/tags', text: '标签' },
   { href: '/archive', text: '归档' },
 ];
+
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+function isActive(href: string) {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 ---
 
-<header class="py-6">
-  <nav class="flex justify-between items-center flex-wrap">
+<header transition:persist="site-header" class="relative py-6">
+  <nav class="flex items-center justify-between gap-4" aria-label="主导航">
     <a href="/" class="text-2xl font-bold text-gray-900 dark:text-white">{ siteConfig.title }</a>
-    <div class="flex items-center gap-6">
-      <ul class="flex gap-6">
+    <div class="flex items-center gap-3 md:gap-6">
+      <button
+        id="nav-toggle"
+        type="button"
+        class="inline-flex items-center justify-center p-2 text-gray-700 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white md:hidden"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="打开菜单"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <ul id="site-nav" class="absolute left-0 right-0 top-full z-40 hidden flex-col gap-4 border-y border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900 md:static md:z-auto md:flex md:flex-row md:gap-6 md:border-0 md:bg-transparent md:p-0">
         {navItems.map(({ href, text }) => (
           <li>
             <a
               href={href}
-              class="font-bold text-gray-700 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white"
+              aria-current={isActive(href) ? 'page' : undefined}
+              class:list={[
+                'font-bold hover:text-gray-900 dark:hover:text-white',
+                isActive(href) ? 'text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-100',
+              ]}
             >
               {text}
             </a>
@@ -32,3 +55,23 @@ const navItems = [
     </div>
   </nav>
 </header>
+
+<script>
+  function bindNav() {
+    const button = document.getElementById('nav-toggle');
+    const nav = document.getElementById('site-nav');
+    if (!button || !nav || button.dataset.bound === 'true') return;
+    button.dataset.bound = 'true';
+
+    button.addEventListener('click', () => {
+      const open = nav.classList.contains('hidden');
+      nav.classList.toggle('hidden', !open);
+      nav.classList.toggle('flex', open);
+      button.setAttribute('aria-expanded', String(open));
+      button.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+    });
+  }
+
+  document.addEventListener('astro:page-load', bindNav);
+  if (document.readyState !== 'loading') bindNav();
+</script>

@@ -68,7 +68,7 @@ if (redirect) {
 }
 ---
 
-<BaseLayout title={`包含 ${tag} 标签的博客${currentPage > 1 ? ` - 第 ${currentPage} 页` : ''}`}>
+<BaseLayout title={`包含 ${tag} 标签的博客${currentPage > 1 ? ` - 第 ${currentPage} 页` : ''}`} description={`包含「${tag}」标签的文章`}>
   <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">
     包含 {tag} 标签的博客{currentPage > 1 && ` - 第 ${currentPage} 页`}
   </h1>

@@ -5,7 +5,7 @@ created: 2025-06-17T18:00:00.000Z
 updated: 2026-05-09T21:20:00.000Z
 tags: [关于]
 hidden: false
-image: "https://290f154.webp.li/202506170111213.png"
+image: ./readme-cover.png
 ---
 
 基于[Astro Zen Blog](https://github.com/larry-xue/astro-zen-blog)主题的汉化，并对部分功能进行改进。
@@ -72,6 +72,7 @@ export const siteConfig: SiteConfig = {
   title: "您的博客",
   slogan: "探索世界与自我",
   description: "在这里写描述",
+  timezone: "Asia/Shanghai",
   social: {
     // 原版集成的一些联系方式, 不需要则留空
     github: "https://github.com/username",
@@ -92,11 +93,11 @@ export const siteConfig: SiteConfig = {
 为了方便创建新文章，本模板提供了 pnpm 脚本：
 
 ```bash
-# 这将创建一个新md文件，并保存至 src/content/blog/文件名.md
+# 这将创建一个新 md 文件，并保存至 src/content/blog/文件名.md
 pnpm new-post 文件名
 ```
 
-你可以通过修改 scripts/new-post.js 文件来定制新文章的模板。
+你可以通过修改 `scripts/add-post.js` 定制新文章的模板。`hidden: true` 或创建时间晚于构建时间的文章不会公开。
 
 ## 构建和部署
 
@@ -108,7 +109,7 @@ pnpm new-post 文件名
 
    参考Caddyfile配置：
 
-   ```caddyfile
+   ```text
    blog.example.com {
      root * /var/www/blog/dist
      file_server

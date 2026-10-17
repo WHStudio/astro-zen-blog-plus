@@ -2,7 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import PostDate from './PostDate.astro';
 import PostTags from './PostTags.astro';
-import { Image } from 'astro:assets';
+import CoverImage from './CoverImage.astro';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -10,22 +10,15 @@ interface Props {
 
 const { post } = Astro.props;
 const { title, description, created, updated, tags, image } = post.data;
-
-// Ensure image dimensions are available to prevent CLS
-const imageWidth = 800; // Set appropriate default width
-const imageHeight = 400; // Set appropriate default height
 ---
 
 <article class="mb-12 p-6 bg-gray-50 dark:bg-gray-800/60 rounded-xl shadow-md hover:shadow-xl dark:shadow-gray-700/30 dark:hover:shadow-2xl dark:hover:shadow-primary-500/20 border border-gray-200 dark:border-gray-700 transition-all duration-200">
   {image && (
     <a href={`/blog/${post.id}`} class="block mb-4">
-      <Image
+      <CoverImage
         src={image}
         alt={title}
-        width={imageWidth}
-        height={imageHeight}
-        decoding='async'
-        loading='lazy'
+        loading="lazy"
         class="w-full h-44 sm:h-52 md:h-60 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
       />
     </a>

@@ -4,6 +4,7 @@ set -Eeuo pipefail
 
 ARCHIVE_PATH="/root/dist.tar.gz"
 TARGET_DIR="/var/www/blog/dist"
+BACKUP_DIR="${TARGET_DIR}.old"
 TARGET_PARENT="$(dirname "$TARGET_DIR")"
 TMP_DIR="$(mktemp -d /tmp/blog-dist-deploy-XXXXXX)"
 
@@ -36,14 +37,25 @@ if [[ ! -d "$TMP_DIR/dist" ]]; then
   exit 1
 fi
 
-echo "==> 删除旧目录：$TARGET_DIR"
-rm -rf "$TARGET_DIR"
-
 echo "==> 确保目标父目录存在：$TARGET_PARENT"
 mkdir -p "$TARGET_PARENT"
 
+if [[ -d "$TARGET_DIR" ]]; then
+  echo "==> 保留旧目录以便回滚：$BACKUP_DIR"
+  rm -rf "$BACKUP_DIR"
+  mv "$TARGET_DIR" "$BACKUP_DIR"
+fi
+
 echo "==> 部署新文件到：$TARGET_DIR"
-mv "$TMP_DIR/dist" "$TARGET_DIR"
+if ! mv "$TMP_DIR/dist" "$TARGET_DIR"; then
+  echo "部署失败，正在恢复旧目录。" >&2
+  if [[ -d "$BACKUP_DIR" ]]; then
+    mv "$BACKUP_DIR" "$TARGET_DIR"
+  fi
+  exit 1
+fi
+
+rm -rf "$BACKUP_DIR"
 
 echo "==> 删除压缩包：$ARCHIVE_PATH"
 rm -f "$ARCHIVE_PATH"
