@@ -139,6 +139,34 @@ pnpm new-post 文件名
 
    接下来以Root身份登录您的Linux服务器，执行`linux-decompress.sh`，可以快速部署静态文件。
 
+4. 内容备份与迁移（可选）
+
+   `win-backup.ps1` 和 `linux-backup.sh` 只打包站点自定义内容和已发布文章，不包含主题代码、依赖和构建结果：
+
+   - `src/config.ts`：站点配置
+   - `public/`：图标等静态资源
+   - `src/content/blog/`：已发布文章
+
+   两个脚本都能打包，也都能解压覆盖。换电脑或升级主题时，先准备好项目代码，再把备份覆盖回去。覆盖会替换上面三项；备份里没有的文章和静态文件会被删除。备份会跳过这些目录中的 `.git`、`node_modules`，以及 `.DS_Store`、`Thumbs.db`、`desktop.ini`。
+
+   Windows（PowerShell 5.1 或 7+，系统自带 `tar`）：
+
+   ```powershell
+   # 在项目根目录生成 content-backup-时间戳.tar.gz
+   .\win-backup.ps1
+
+   # 覆盖还原
+   .\win-backup.ps1 unpack .\content-backup-20261017-120000.tar.gz
+   ```
+
+   Linux：
+
+   ```bash
+   chmod +x linux-backup.sh
+   ./linux-backup.sh pack
+   ./linux-backup.sh unpack ./content-backup-20261017-120000.tar.gz
+   ```
+
 ## 许可证
 
 该项目基于 MIT 许可证 - 查看 LICENSE 文件了解详情。
