@@ -5,6 +5,8 @@ export interface SiteConfig {
   slogan: string;
   description?: string;
   site: string,
+  /** IANA timezone used for archive years and other build-time dates. */
+  timezone: string;
   social: {
     github?: string;
     linkedin?: string;
@@ -19,6 +21,7 @@ export const siteConfig: SiteConfig = {
   title: "您的博客",
   slogan: "探索世界与自我",
   description: "在这里写描述",
+  timezone: "Asia/Shanghai",
   social: {
     // 原版集成的一些联系方式, 不需要则留空
     github: "https://github.com/username",

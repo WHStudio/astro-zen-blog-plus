@@ -42,6 +42,14 @@ export function formatDateTimeShort(date: Date): string {
   });
 }
 
-export function isPublished(date: Date): boolean {
-  return date <= new Date();
+export function isPublished(date: Date, now = new Date()): boolean {
+  return date <= now;
+}
+
+export function getZonedYear(date: Date, timeZone: string): number {
+  const year = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+  }).format(date);
+  return Number(year);
 }

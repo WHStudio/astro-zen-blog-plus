@@ -60,7 +60,7 @@ function getPageNumbers() {
 const pageNumbers = getPageNumbers();
 ---
 
-<nav class="flex flex-col items-center gap-4 mt-12">
+<nav class="flex flex-col items-center gap-4 mt-12" aria-label="分页">
     <!-- 分页导航 -->
   <div class="flex items-center gap-2 flex-wrap justify-center">
     <!-- 页码 -->
@@ -73,7 +73,7 @@ const pageNumbers = getPageNumbers();
         );
       } else if (pageNum === currentPage) {
         return (
-          <span class="px-3 py-2 text-sm bg-green-700 text-white rounded cursor-default">
+          <span class="px-3 py-2 text-sm bg-primary-700 text-white rounded cursor-default" aria-current="page">
             {pageNum}
           </span>
         );

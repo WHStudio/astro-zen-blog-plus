@@ -21,63 +21,49 @@
 </button>
 
 <script>
-  // 回到顶部功能
+  let backToTopController: AbortController | null = null
+
   function initBackToTop() {
-    const backToTopButton = document.getElementById('back-to-top');
-    
-    if (!backToTopButton) return;    // 显示/隐藏按钮
-    function toggleButton() {
-      if (!backToTopButton) return;
-      
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
-      if (scrollTop > 300) {
-        backToTopButton.classList.remove('opacity-0', 'invisible', 'translate-y-4');
-        backToTopButton.classList.add('opacity-100', 'visible', 'translate-y-0');
-      } else {
-        backToTopButton.classList.add('opacity-0', 'invisible', 'translate-y-4');
-        backToTopButton.classList.remove('opacity-100', 'visible', 'translate-y-0');
-      }
-    }    // 平滑滚动到顶部
-    function scrollToTop() {
-      // 添加小动画效果
-      const svg = backToTopButton?.querySelector('svg');
-      if (svg) {
-        svg.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-          svg.style.transform = 'scale(1)';
-        }, 150);
-      }
-      
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+    backToTopController?.abort()
+    const backToTopButton = document.getElementById('back-to-top')
+    if (!backToTopButton) {
+      backToTopController = null
+      return
     }
 
-    // 监听滚动事件
-    let ticking = false;
+    backToTopController = new AbortController()
+    const { signal } = backToTopController
+
+    function toggleButton() {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const visible = scrollTop > 300
+      backToTopButton.classList.toggle('opacity-0', !visible)
+      backToTopButton.classList.toggle('invisible', !visible)
+      backToTopButton.classList.toggle('translate-y-4', !visible)
+      backToTopButton.classList.toggle('opacity-100', visible)
+      backToTopButton.classList.toggle('visible', visible)
+      backToTopButton.classList.toggle('translate-y-0', visible)
+    }
+
+    function scrollToTop() {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
+    }
+
+    let ticking = false
     window.addEventListener('scroll', () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          toggleButton();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    });
-
-    // 点击事件
-    backToTopButton.addEventListener('click', scrollToTop);
-
-    // 初始检查
-    toggleButton();
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        toggleButton()
+        ticking = false
+      })
+    }, { signal })
+    backToTopButton.addEventListener('click', scrollToTop, { signal })
+    toggleButton()
   }
 
-  // 页面加载时初始化
-  document.addEventListener('DOMContentLoaded', initBackToTop);
-  
-  // 支持 Astro 的页面切换
-  document.addEventListener('astro:page-load', initBackToTop);
+  document.addEventListener('astro:page-load', initBackToTop)
+  if (document.readyState !== 'loading') initBackToTop()
 </script>
 

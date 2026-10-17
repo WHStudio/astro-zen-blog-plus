@@ -1,46 +1,37 @@
+const media = window.matchMedia('(prefers-color-scheme: dark)');
 
-const initTheme = () => {
-  const theme = (() => {
-    const storedTheme = typeof localStorage !== 'undefined' ? localStorage.getItem('theme') : null;
-    if (storedTheme) {
-      return storedTheme;
-    }
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  })();
+function storedTheme(): 'dark' | 'light' | null {
+  const stored = localStorage.getItem('theme');
+  return stored === 'dark' || stored === 'light' ? stored : null;
+}
 
-  if (theme === 'light') {
-    document.documentElement.classList.remove('dark');
-  } else {
-    document.documentElement.classList.add('dark');
-  }
+function preferredTheme(): 'dark' | 'light' {
+  return storedTheme() ?? (media.matches ? 'dark' : 'light');
+}
 
-  if (typeof localStorage !== 'undefined') {
-    window.localStorage.setItem('theme', theme);
-  }
-};
+function applyTheme(theme: 'dark' | 'light') {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+}
 
-const handleToggleClick = () => {
-  const element = document.documentElement;
-  element.classList.toggle('dark');
+function initTheme() {
+  applyTheme(preferredTheme());
+}
 
-  const isDark = element.classList.contains('dark');
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  }
-};
+function handleToggleClick() {
+  const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem('theme', next);
+}
 
-// Initialize theme on page load
 initTheme();
-
-// Re-run initialization when document is shown again (view transitions)
 document.addEventListener('astro:after-swap', initTheme);
+media.addEventListener('change', () => {
+  if (!storedTheme()) applyTheme(media.matches ? 'dark' : 'light');
+});
 
-// Setup click listener
 document.addEventListener('astro:page-load', () => {
-  document
-    .getElementById('themeToggle')
-    ?.addEventListener('click', handleToggleClick);
+  const button = document.getElementById('themeToggle');
+  if (!button || button.dataset.bound === 'true') return;
+  button.dataset.bound = 'true';
+  button.addEventListener('click', handleToggleClick);
 });

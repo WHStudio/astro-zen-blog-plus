@@ -1,10 +1,8 @@
----
----
-
 <button
   id="themeToggle"
+  type="button"
   class="p-2 text-gray-700 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white"
-  aria-label="Toggle theme"
+  aria-label="切换颜色主题"
 >
   <svg
     id="sun-icon"
@@ -12,6 +10,7 @@
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
+    aria-hidden="true"
   >
     <path
       stroke-linecap="round"
@@ -26,6 +25,7 @@
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
+    aria-hidden="true"
   >
     <path
       stroke-linecap="round"
@@ -35,7 +35,3 @@
     />
   </svg>
 </button>
-
-<script>
-  import '../scripts/theme';
-</script>

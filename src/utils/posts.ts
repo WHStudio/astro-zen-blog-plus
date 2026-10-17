@@ -8,15 +8,28 @@ export interface PostFilter {
 }
 
 export function sortPostsByDate(posts: CollectionEntry<'blog'>[]): CollectionEntry<'blog'>[] {
-  return posts.sort((a, b) => {
+  return [...posts].sort((a, b) => {
     const dateA = a.data.updated ?? a.data.created;
     const dateB = b.data.updated ?? b.data.created;
     return dateB.valueOf() - dateA.valueOf();
   });
 }
 
-export function filterPublishedPosts(posts: CollectionEntry<'blog'>[]): CollectionEntry<'blog'>[] {
-  return posts.filter(post => !post.data.hidden && isPublished(post.data.created));
+export function getAdjacentPosts(posts: CollectionEntry<'blog'>[], id: string): {
+  newer?: CollectionEntry<'blog'>;
+  older?: CollectionEntry<'blog'>;
+} {
+  const sorted = sortPostsByDate(filterPublishedPosts(posts));
+  const index = sorted.findIndex((post) => post.id === id);
+  if (index === -1) return {};
+  return {
+    newer: index > 0 ? sorted[index - 1] : undefined,
+    older: index < sorted.length - 1 ? sorted[index + 1] : undefined,
+  };
+}
+
+export function filterPublishedPosts(posts: CollectionEntry<'blog'>[], now = new Date()): CollectionEntry<'blog'>[] {
+  return posts.filter(post => !post.data.hidden && isPublished(post.data.created, now));
 }
 
 export function filterPosts(posts: CollectionEntry<'blog'>[], filter: PostFilter = {}): CollectionEntry<'blog'>[] {
@@ -65,7 +78,13 @@ export function getAllTags(posts: CollectionEntry<'blog'>[]): string[] {
  * @param content 文章的原始 markdown 内容
  * @returns 字符数统计
  */
-export function getWordCount(content: string): number {
+export function hasMath(content: string | undefined): boolean {
+  if (!content) return false;
+  return /\$\$[\s\S]+?\$\$|\$[^$\n]+\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(content);
+}
+
+export function getWordCount(content: string | undefined): number {
+  if (!content) return 0;
   // 移除 frontmatter（YAML 头部）
   const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n?/, '');
   

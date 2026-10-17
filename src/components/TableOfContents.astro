@@ -27,6 +27,8 @@ if (!filteredHeadings || filteredHeadings.length === 0) {
   class="toc-toggle fixed right-0 top-1/2 z-50 bg-gray-800/90 dark:bg-gray-700/90 backdrop-blur-sm text-white rounded-l-md shadow-lg hover:bg-gray-700/95 dark:hover:bg-gray-600/95 border-l border-t border-b border-gray-600/50"
   style="padding: 1rem 0.5rem; transform: translateY(-50%);"
   aria-label="切换目录"
+  aria-expanded="false"
+  aria-controls="toc-panel"
   title="目录"
 >
   <svg
@@ -78,160 +80,115 @@ if (!filteredHeadings || filteredHeadings.length === 0) {
 </nav>
 
 <script>
+  let tocController: AbortController | null = null
+
   function initTableOfContents() {
-    const toggleButton = document.getElementById('toc-toggle');
-    const tocPanel = document.getElementById('toc-panel');
-    const tocIcon = document.getElementById('toc-icon');
-    
-    if (!toggleButton || !tocPanel || !tocIcon) return;
+    tocController?.abort()
+    const toggleButton = document.getElementById('toc-toggle')
+    const tocPanel = document.getElementById('toc-panel')
+    const tocIcon = document.getElementById('toc-icon')
+    if (!toggleButton || !tocPanel || !tocIcon) {
+      tocController = null
+      return
+    }
 
-    let isOpen = false;    // 检测屏幕尺寸并调整样式
+    tocController = new AbortController()
+    const { signal } = tocController
+    let isOpen = false
+
     function adjustTocPosition() {
-      const isDesktop = window.innerWidth >= 1024; // lg breakpoint
-      
+      const isDesktop = window.innerWidth >= 1024
       if (isDesktop) {
-        // 大屏幕：显示在右侧，完全隐藏/显示
-        tocPanel.style.right = '0.5rem';
-        tocPanel.style.left = 'auto';
-        tocPanel.style.width = '280px';
-        
+        tocPanel.style.right = '0.5rem'
+        tocPanel.style.left = 'auto'
+        tocPanel.style.width = '280px'
+        tocPanel.style.maxWidth = ''
         if (isOpen) {
-          tocPanel.style.transform = 'translateY(-50%) translateX(0)';
-          tocPanel.style.opacity = '1';
-          tocPanel.style.visibility = 'visible';
+          tocPanel.style.transform = 'translateY(-50%) translateX(0)'
+          tocPanel.style.opacity = '1'
+          tocPanel.style.visibility = 'visible'
         } else {
-          tocPanel.style.transform = 'translateY(-50%) translateX(100%)';
-          tocPanel.style.opacity = '0';
-          tocPanel.style.visibility = 'hidden';
+          tocPanel.style.transform = 'translateY(-50%) translateX(100%)'
+          tocPanel.style.opacity = '0'
+          tocPanel.style.visibility = 'hidden'
         }
       } else {
-        // 小屏幕：居中显示
-        tocPanel.style.left = '50%';
-        tocPanel.style.right = 'auto';
-        tocPanel.style.width = 'calc(100vw - 2rem)';
-        tocPanel.style.maxWidth = '320px';
-        tocPanel.style.visibility = 'visible';
-        
+        tocPanel.style.left = '50%'
+        tocPanel.style.right = 'auto'
+        tocPanel.style.width = 'calc(100vw - 2rem)'
+        tocPanel.style.maxWidth = '320px'
+        tocPanel.style.visibility = 'visible'
         if (isOpen) {
-          tocPanel.style.transform = 'translateY(-50%) translateX(-50%)';
-          tocPanel.style.opacity = '1';
+          tocPanel.style.transform = 'translateY(-50%) translateX(-50%)'
+          tocPanel.style.opacity = '1'
         } else {
-          tocPanel.style.transform = 'translateY(-50%) translateX(150%)';
-          tocPanel.style.opacity = '0';
+          tocPanel.style.transform = 'translateY(-50%) translateX(150%)'
+          tocPanel.style.opacity = '0'
         }
       }
     }
 
-    // 切换目录显示
-    function toggleToc() {
-      isOpen = !isOpen;
-      adjustTocPosition();
-      
-      // 旋转图标
-      if (isOpen) {
-        tocIcon.style.transform = 'rotate(180deg)';
-      } else {
-        tocIcon.style.transform = 'rotate(0deg)';
-      }
+    function setOpen(open: boolean) {
+      isOpen = open
+      adjustTocPosition()
+      tocIcon.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)'
+      toggleButton.setAttribute('aria-expanded', String(open))
     }
 
-    // 平滑滚动到标题
-    function scrollToHeading(event) {
-      event.preventDefault();
-      const target = event.target;
-      const headingId = target.getAttribute('data-heading-id');
-      
-      if (headingId) {
-        const heading = document.getElementById(headingId);
-        if (heading) {
-          heading.scrollIntoView({ 
-            behavior: 'smooth',
-            block: 'start'
-          });
-          
-          // 在移动端点击后自动关闭目录
-          if (window.innerWidth < 1024) {
-            setTimeout(() => {
-              isOpen = false;
-              adjustTocPosition();
-              tocIcon.style.transform = 'rotate(0deg)';
-            }, 300);
-          }
-        }
-      }
+    function scrollToHeading(event: Event) {
+      event.preventDefault()
+      const target = event.currentTarget
+      if (!(target instanceof HTMLElement)) return
+      const headingId = target.getAttribute('data-heading-id')
+      if (!headingId) return
+      const heading = document.getElementById(headingId)
+      if (!heading) return
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      heading.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+      if (window.innerWidth < 1024) setOpen(false)
     }
 
-    // 高亮当前标题
     function highlightCurrentHeading() {
-      const headings = Array.from(document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id]'));
-      const tocLinks = Array.from(document.querySelectorAll('[data-heading-id]'));
-      
-      let currentHeading = null;
-      const scrollPosition = window.scrollY + 100; // 偏移量
-        // 找到当前可见的标题
+      const headings = Array.from(document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id]'))
+      const tocLinks = Array.from(document.querySelectorAll('[data-heading-id]'))
+      let currentHeading: Element | null = null
+      const scrollPosition = window.scrollY + 100
       for (let i = headings.length - 1; i >= 0; i--) {
-        const heading = headings[i];
-        if (heading && heading instanceof HTMLElement && heading.offsetTop <= scrollPosition) {
-          currentHeading = heading;
-          break;
+        const heading = headings[i]
+        if (heading instanceof HTMLElement && heading.offsetTop <= scrollPosition) {
+          currentHeading = heading
+          break
         }
       }
-      
-      // 更新高亮状态
       tocLinks.forEach(link => {
-        link.classList.remove('text-primary-600', 'dark:text-primary-400', 'bg-primary-100', 'dark:bg-primary-900/50', 'font-bold');
-        link.classList.add('text-gray-700', 'dark:text-gray-300');
-        if (link instanceof HTMLElement) {
-          link.style.borderLeft = '';
-        }
-      });
-      
+        link.classList.remove('text-primary-600', 'dark:text-primary-400', 'bg-primary-100', 'dark:bg-primary-900/50', 'font-bold')
+        link.classList.add('text-gray-700', 'dark:text-gray-300')
+      })
       if (currentHeading) {
-        const currentLink = document.querySelector(`[data-heading-id="${currentHeading.id}"]`);
-        if (currentLink) {
-          currentLink.classList.remove('text-gray-700', 'dark:text-gray-300');
-          currentLink.classList.add('text-primary-600', 'dark:text-primary-400', 'bg-primary-100', 'dark:bg-primary-900/50', 'font-bold');
-        }
+        const currentLink = document.querySelector(`[data-heading-id="${CSS.escape(currentHeading.id)}"]`)
+        currentLink?.classList.remove('text-gray-700', 'dark:text-gray-300')
+        currentLink?.classList.add('text-primary-600', 'dark:text-primary-400', 'bg-primary-100', 'dark:bg-primary-900/50', 'font-bold')
       }
     }
 
-    // 事件监听
-    toggleButton.addEventListener('click', toggleToc);
-    window.addEventListener('resize', adjustTocPosition);
-    window.addEventListener('scroll', highlightCurrentHeading);
-    
-    // 为所有目录链接添加点击事件
-    const tocLinks = document.querySelectorAll('[data-heading-id]');
-    tocLinks.forEach(link => {
-      link.addEventListener('click', scrollToHeading);
-    });
-
-    // 初始化位置
-    adjustTocPosition();
-    highlightCurrentHeading();
-
-    // 点击外部区域关闭目录（仅在移动端）
+    toggleButton.addEventListener('click', () => setOpen(!isOpen), { signal })
+    window.addEventListener('resize', adjustTocPosition, { signal })
+    window.addEventListener('scroll', highlightCurrentHeading, { signal })
+    document.querySelectorAll('[data-heading-id]').forEach(link => {
+      link.addEventListener('click', scrollToHeading, { signal })
+    })
     document.addEventListener('click', (event) => {
-      if (window.innerWidth < 1024 && isOpen) {
-        const target = event.target;
-        if (target && target instanceof Node && !tocPanel.contains(target) && !toggleButton.contains(target)) {
-          isOpen = false;
-          adjustTocPosition();
-          tocIcon.style.transform = 'rotate(0deg)';
-        }
+      if (window.innerWidth >= 1024 || !isOpen) return
+      const target = event.target
+      if (target instanceof Node && !tocPanel.contains(target) && !toggleButton.contains(target)) {
+        setOpen(false)
       }
-    });
+    }, { signal })
+
+    adjustTocPosition()
+    highlightCurrentHeading()
   }
 
-  // 页面加载时初始化
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTableOfContents);
-  } else {
-    initTableOfContents();
-  }
-  
-  // 支持 Astro 的客户端路由
-  document.addEventListener('astro:page-load', initTableOfContents);
+  document.addEventListener('astro:page-load', initTableOfContents)
+  if (document.readyState !== 'loading') initTableOfContents()
 </script>
-
-

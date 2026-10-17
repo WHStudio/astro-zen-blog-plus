@@ -1,19 +1,24 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
+import { filterPublishedPosts, getAdjacentPosts } from '../../utils/posts';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: { post },
-  }));
+  const published = filterPublishedPosts(posts);
+  return published.map((post) => {
+    const { newer, older } = getAdjacentPosts(posts, post.id);
+    return {
+      params: { slug: post.id },
+      props: { post, newer, older },
+    };
+  });
 }
 
-const { post } = Astro.props;
-const { Content } = await render(post);
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
 ---
 
-<BlogPost post={post}>
+<BlogPost post={post} headings={headings} newer={newer} older={older}>
   <Content />
 </BlogPost>

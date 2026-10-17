@@ -6,15 +6,17 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
-    "preview": "astro build & astro preview",
+    "preview": "astro preview",
     "astro": "astro",
     "new-post": "node scripts/add-post.js",
+    "check": "astro check",
+    "test": "tsx --test tests/*.test.ts",
+    "verify": "node scripts/verify-build.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.3",
-    "@astrojs/sitemap": "^3.7.4",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.4.0",
@@ -27,10 +29,17 @@
     "tailwindcss": "^4.3.3"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@types/node": "^24.12.4",
     "@typescript-eslint/eslint-plugin": "^8.71.2",
     "@typescript-eslint/parser": "^8.71.2",
     "eslint": "^10.12.0",
-    "eslint-plugin-astro": "^1.7.0"
+    "eslint-plugin-astro": "^1.7.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
   }
 }
