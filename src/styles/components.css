@@ -18,6 +18,18 @@
   transition: all var(--transition-normal);
 }
 
+/* 桌面导航不铺底色，避免暗色切换时比页面背景更早变黑 */
+#site-nav {
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+}
+
+@media (min-width: 768px) {
+  #site-nav {
+    background-color: transparent;
+    border-color: transparent;
+  }
+}
+
 /* =============================================================================
    交互组件
    ============================================================================= */

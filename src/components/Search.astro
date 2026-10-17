@@ -101,11 +101,11 @@
       searchInput.focus()
     }
 
-    function closeModal() {
+    function closeModal(restoreFocus = true) {
       setOpen(false)
       searchInput.value = ''
       searchResults.innerHTML = message(emptyMessage)
-      lastFocus?.focus()
+      if (restoreFocus) lastFocus?.focus()
     }
 
     function displayResults(results: Array<SearchEntry & { matchedTitle: string; matchedContent: string }>) {
@@ -163,7 +163,11 @@
       debounceTimer = setTimeout(handleSearch, 300)
     }, { signal })
     searchButton.addEventListener('click', openModal, { signal })
-    closeButton?.addEventListener('click', closeModal, { signal })
+    closeButton?.addEventListener('click', () => closeModal(), { signal })
+    searchResults.addEventListener('click', (event) => {
+      const target = event.target
+      if (target instanceof Element && target.closest('a')) closeModal(false)
+    }, { signal })
     searchModal.addEventListener('click', (event) => {
       if (event.target === searchModal) closeModal()
     }, { signal })
