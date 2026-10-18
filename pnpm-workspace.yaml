@@ -1,3 +1,6 @@
+# pnpm 9 rejects a settings-only workspace file. Workers Builds still runs pnpm 9.10.0.
+packages:
+  - "."
 allowBuilds:
   esbuild: true
   sharp: true
