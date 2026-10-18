@@ -12,7 +12,8 @@ interface Props {
   type?: 'website' | 'article'
   publishedTime?: Date
   updatedTime?: Date
-  styles?: string[]
+  inlineStyle?: string
+  preloadImage?: string
   noindex?: boolean
 }
 
@@ -23,7 +24,8 @@ const {
   type = 'website',
   publishedTime,
   updatedTime,
-  styles = [],
+  inlineStyle,
+  preloadImage,
   noindex = false,
 } = Astro.props
 
@@ -39,13 +41,14 @@ const imageUrl = image
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {preloadImage && <link rel="preload" as="image" href={preloadImage} fetchpriority="high" />}
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <title>{documentTitle}</title>
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap.xml" />
-    {styles.map((href) => <link rel="stylesheet" href={href} />)}
+    {inlineStyle && <style is:inline set:html={inlineStyle}></style>}
     <meta property="og:title" content={documentTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />

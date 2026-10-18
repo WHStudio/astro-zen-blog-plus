@@ -64,7 +64,7 @@ hidden: false
 
 一张外部图片，悬浮可见标题。
 
-![img](https://www.todaybing.com/api/today/cn "必应壁纸")
+<img src="https://www.todaybing.com/api/today/cn" alt="必应壁纸" title="必应壁纸" width="1920" height="1080" loading="lazy" decoding="async">
 
 ### 10. 删除线
 

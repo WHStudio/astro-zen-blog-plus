@@ -6,6 +6,9 @@ import TableOfContents from '../components/TableOfContents.astro'
 import BackToTop from '../components/BackToTop.astro'
 import CoverImage from '../components/CoverImage.astro'
 import type { CollectionEntry } from 'astro:content'
+import type { ImageMetadata } from 'astro'
+import { getImage } from 'astro:assets'
+import { swapKatexFontDisplay } from '../plugins/katex-font-display.mjs'
 import { postHref } from '../utils/paths'
 import { getWordCount, hasMath } from '../utils/posts'
 
@@ -26,11 +29,19 @@ const { post, headings, newer, older } = Astro.props
 const { title, description, created, updated, tags, image } = post.data
 const wordCount = getWordCount(post.body)
 const includeKaTeX = hasMath(post.body)
-let katexHref: string | undefined
-if (includeKaTeX) {
-  katexHref = (await import('../styles/katex.css?url')).default
-}
+const katexCss = includeKaTeX
+  ? swapKatexFontDisplay((await import('../styles/katex.css?inline')).default)
+  : undefined
 const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.src
+const localCover: ImageMetadata | undefined =
+  image && typeof image !== 'string' && image.format
+    ? { src: image.src, width: image.width, height: image.height, format: image.format }
+    : undefined
+const preloadImage = typeof image === 'string'
+  ? image
+  : localCover
+    ? (await getImage({ src: localCover })).src
+    : undefined
 ---
 
 <BaseLayout
@@ -40,7 +51,8 @@ const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.
   type="article"
   publishedTime={created}
   updatedTime={updated}
-  styles={katexHref ? [katexHref] : []}
+  inlineStyle={katexCss}
+  preloadImage={preloadImage}
   noindex={post.data.hidden === true}
 >
   <article class="max-w-none mx-auto px-4">
@@ -48,7 +60,7 @@ const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.
       <CoverImage
         src={image}
         alt={title}
-        loading="eager"
+        priority
         class="w-full h-[240px] sm:h-[320px] md:h-[450px] object-cover rounded-xl shadow-lg mb-8"
       />
     )}
@@ -81,7 +93,7 @@ const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.
       prose-a:text-primary-600 dark:prose-a:text-primary-400
       prose-a:hover:text-primary-500 dark:prose-a:hover:text-primary-300
       prose-strong:text-gray-900 dark:prose-strong:text-gray-100
-      prose-code:text-blue-500 dark:prose-code:text-orange-400
+      prose-code:text-blue-700 dark:prose-code:text-orange-400
       prose-blockquote:text-gray-700 dark:prose-blockquote:text-gray-300
       prose-li:text-gray-700 dark:prose-li:text-gray-300
       prose-table:text-gray-700 dark:prose-table:text-gray-300
