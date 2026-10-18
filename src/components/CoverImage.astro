@@ -14,14 +14,25 @@ interface Props {
   alt: string;
   class?: string;
   loading?: 'eager' | 'lazy';
+  /** Hero image. Loads immediately, decodes synchronously, and uses high fetch priority. */
+  priority?: boolean;
 }
 
-const { src, alt, class: className, loading = 'lazy' } = Astro.props;
+const { src, alt, class: className, loading = 'lazy', priority = false } = Astro.props;
 const remote = typeof src === 'string';
 ---
 
 {remote ? (
-  <img src={src} alt={alt} loading={loading} decoding="async" class={className} />
+  <img
+    src={src}
+    alt={alt}
+    loading={priority ? 'eager' : loading}
+    decoding={priority ? 'sync' : 'async'}
+    fetchpriority={priority ? 'high' : undefined}
+    class={className}
+  />
+) : priority ? (
+  <Image src={src as ImageMetadata} alt={alt} class={className} priority />
 ) : (
   <Image src={src as ImageMetadata} alt={alt} loading={loading} decoding="async" class={className} />
 )}

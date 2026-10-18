@@ -34,9 +34,9 @@ image: ./readme-cover.png
 
 **四项全满，快如闪电！**
 
-![mobile](https://290f154.webp.li/202506150505513.png)
+<img src="https://290f154.webp.li/202506150505513.png" alt="mobile" width="1597" height="487" loading="lazy" decoding="async">
 
-![desktop](https://290f154.webp.li/202506150507214.png)
+<img src="https://290f154.webp.li/202506150507214.png" alt="desktop" width="1598" height="467" loading="lazy" decoding="async">
 
 ## 安装和调试
 

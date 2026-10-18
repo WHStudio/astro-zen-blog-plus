@@ -6,6 +6,8 @@ import TableOfContents from '../components/TableOfContents.astro'
 import BackToTop from '../components/BackToTop.astro'
 import CoverImage from '../components/CoverImage.astro'
 import type { CollectionEntry } from 'astro:content'
+import { getImage } from 'astro:assets'
+import { swapKatexFontDisplay } from '../plugins/katex-font-display.mjs'
 import { postHref } from '../utils/paths'
 import { getWordCount, hasMath } from '../utils/posts'
 
@@ -26,11 +28,15 @@ const { post, headings, newer, older } = Astro.props
 const { title, description, created, updated, tags, image } = post.data
 const wordCount = getWordCount(post.body)
 const includeKaTeX = hasMath(post.body)
-let katexHref: string | undefined
-if (includeKaTeX) {
-  katexHref = (await import('../styles/katex.css?url')).default
-}
+const katexCss = includeKaTeX
+  ? swapKatexFontDisplay((await import('../styles/katex.css?inline')).default)
+  : undefined
 const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.src
+const preloadImage = !image
+  ? undefined
+  : typeof image === 'string'
+    ? image
+    : (await getImage({ src: image })).src
 ---
 
 <BaseLayout
@@ -40,7 +46,8 @@ const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.
   type="article"
   publishedTime={created}
   updatedTime={updated}
-  styles={katexHref ? [katexHref] : []}
+  inlineStyle={katexCss}
+  preloadImage={preloadImage}
   noindex={post.data.hidden === true}
 >
   <article class="max-w-none mx-auto px-4">
@@ -48,7 +55,7 @@ const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.
       <CoverImage
         src={image}
         alt={title}
-        loading="eager"
+        priority
         class="w-full h-[240px] sm:h-[320px] md:h-[450px] object-cover rounded-xl shadow-lg mb-8"
       />
     )}
