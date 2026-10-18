@@ -6,6 +6,7 @@ import TableOfContents from '../components/TableOfContents.astro'
 import BackToTop from '../components/BackToTop.astro'
 import CoverImage from '../components/CoverImage.astro'
 import type { CollectionEntry } from 'astro:content'
+import type { ImageMetadata } from 'astro'
 import { getImage } from 'astro:assets'
 import { swapKatexFontDisplay } from '../plugins/katex-font-display.mjs'
 import { postHref } from '../utils/paths'
@@ -32,11 +33,15 @@ const katexCss = includeKaTeX
   ? swapKatexFontDisplay((await import('../styles/katex.css?inline')).default)
   : undefined
 const imageUrl = !image ? undefined : typeof image === 'string' ? image : image.src
-const preloadImage = !image
-  ? undefined
-  : typeof image === 'string'
-    ? image
-    : (await getImage({ src: image })).src
+const localCover: ImageMetadata | undefined =
+  image && typeof image !== 'string' && image.format
+    ? { src: image.src, width: image.width, height: image.height, format: image.format }
+    : undefined
+const preloadImage = typeof image === 'string'
+  ? image
+  : localCover
+    ? (await getImage({ src: localCover })).src
+    : undefined
 ---
 
 <BaseLayout
