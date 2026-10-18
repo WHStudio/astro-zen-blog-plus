@@ -32,6 +32,10 @@ export function filterPublishedPosts(posts: CollectionEntry<'blog'>[], now = new
   return posts.filter(post => !post.data.hidden && isPublished(post.data.created, now));
 }
 
+export function filterRoutablePosts(posts: CollectionEntry<'blog'>[], now = new Date()): CollectionEntry<'blog'>[] {
+  return posts.filter(post => isPublished(post.data.created, now));
+}
+
 export function filterPosts(posts: CollectionEntry<'blog'>[], filter: PostFilter = {}): CollectionEntry<'blog'>[] {
   let filteredPosts = filterPublishedPosts(posts);
 

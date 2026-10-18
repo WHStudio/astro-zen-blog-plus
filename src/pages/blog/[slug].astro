@@ -1,12 +1,12 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
-import { filterPublishedPosts, getAdjacentPosts } from '../../utils/posts';
+import { filterRoutablePosts, getAdjacentPosts } from '../../utils/posts';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  const published = filterPublishedPosts(posts);
-  return published.map((post) => {
+  const routable = filterRoutablePosts(posts);
+  return routable.map((post) => {
     const { newer, older } = getAdjacentPosts(posts, post.id);
     return {
       params: { slug: post.id },

@@ -52,8 +52,18 @@ const readme = read('blog/readme/index.html');
 assert.doesNotMatch(readme, /katex\.[^"]+\.css/);
 assert.match(readme, /src="https:\/\/290f154\.webp\.li\/202506150505513\.png"/);
 
-assert.equal(exists('blog/hidden-example/index.html'), false);
+assert.equal(exists('blog/hidden-example/index.html'), true);
 assert.equal(exists('blog/scheduled-future/index.html'), false);
+
+const hidden = read('blog/hidden-example/index.html');
+assert.match(hidden, /可以通过地址直接打开/);
+assert.match(hidden, /name="robots" content="noindex, nofollow"/);
+assert.doesNotMatch(hidden, /href="\/tags\//);
+assert.doesNotMatch(hidden, /上一篇|下一篇/);
+assert.doesNotMatch(read('blog/index.html'), /hidden-example|不会发布的隐藏草稿/);
+assert.doesNotMatch(read('archive/index.html'), /hidden-example|不会发布的隐藏草稿/);
+assert.doesNotMatch(read('tags/index.html'), /#隐藏/);
+assert.doesNotMatch(post, /hidden-example/);
 
 const search = read('api/search.json');
 assert.doesNotMatch(search, /不会发布的隐藏草稿|未来才发布的文章/);

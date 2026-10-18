@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { filterPublishedPosts, getPostsByTag, getWordCount, hasMath, sortPostsByDate } from '../src/utils/posts.ts';
+import { filterPublishedPosts, filterRoutablePosts, getPostsByTag, getWordCount, hasMath, sortPostsByDate } from '../src/utils/posts.ts';
 
 function post(id, data, body = '') {
   return { id, data, body };
@@ -12,8 +12,10 @@ test('published filter removes hidden and future posts', () => {
     post('visible', { hidden: false, created: new Date('2024-01-01T00:00:00.000Z'), tags: ['a'] }),
     post('hidden', { hidden: true, created: new Date('2024-01-01T00:00:00.000Z'), tags: ['隐藏'] }),
     post('future', { hidden: false, created: new Date('2099-01-01T00:00:00.000Z'), tags: ['未来'] }),
+    post('hidden-future', { hidden: true, created: new Date('2099-01-01T00:00:00.000Z'), tags: ['隐藏'] }),
   ];
   assert.deepEqual(filterPublishedPosts(posts, now).map((entry) => entry.id), ['visible']);
+  assert.deepEqual(filterRoutablePosts(posts, now).map((entry) => entry.id), ['visible', 'hidden']);
 });
 
 test('sorting does not mutate the original array', () => {
