@@ -34,22 +34,26 @@ function isActive(href: string) {
           <path d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
       </button>
-      <ul id="site-nav" class="absolute left-0 right-0 top-full z-40 hidden flex-col gap-4 border-y border-gray-200 bg-white p-4 transition-colors duration-300 dark:border-gray-700 dark:bg-gray-900 md:static md:z-auto md:flex md:flex-row md:gap-6 md:border-0 md:bg-transparent md:p-0 md:dark:border-0 md:dark:bg-transparent">
-        {navItems.map(({ href, text }) => (
-          <li>
-            <a
-              href={href}
-              aria-current={isActive(href) ? 'page' : undefined}
-              class:list={[
-                'font-bold hover:text-gray-900 dark:hover:text-white',
-                isActive(href) ? 'text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-100',
-              ]}
-            >
-              {text}
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div id="site-nav-panel" class="site-nav-panel">
+        <div class="site-nav-clip">
+          <ul id="site-nav" class="flex flex-col gap-4 border-y border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900 md:flex-row md:gap-6 md:border-0 md:bg-transparent md:p-0 md:dark:border-0 md:dark:bg-transparent">
+            {navItems.map(({ href, text }) => (
+              <li>
+                <a
+                  href={href}
+                  aria-current={isActive(href) ? 'page' : undefined}
+                  class:list={[
+                    'font-bold hover:text-gray-900 dark:hover:text-white',
+                    isActive(href) ? 'text-primary-700 dark:text-primary-400' : 'text-gray-700 dark:text-gray-100',
+                  ]}
+                >
+                  {text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
       {siteConfig.search && <Search />}
       <ThemeToggle />
     </div>
@@ -57,10 +61,19 @@ function isActive(href: string) {
 </header>
 
 <script>
+  import { navigate } from 'astro:transitions/client';
+  import { whenTransitionEnds } from '../scripts/motion';
   import { isNavActive } from '../utils/nav';
 
   const activeClasses = ['text-primary-700', 'dark:text-primary-400'];
   const inactiveClasses = ['text-gray-700', 'dark:text-gray-100'];
+  const mobileNavQuery = '(max-width: 767px)';
+  let navDocumentBound = false;
+  let navMotion = 0;
+
+  function isMobileNav() {
+    return window.matchMedia(mobileNavQuery).matches;
+  }
 
   function syncNav() {
     const nav = document.getElementById('site-nav');
@@ -75,54 +88,122 @@ function isActive(href: string) {
     });
   }
 
-  function closeMobileNav() {
+  function navParts() {
     const button = document.getElementById('nav-toggle');
+    const panel = document.getElementById('site-nav-panel');
     const nav = document.getElementById('site-nav');
-    if (!button || !nav) return;
-    nav.classList.add('hidden');
-    nav.classList.remove('flex');
-    button.setAttribute('aria-expanded', 'false');
-    button.setAttribute('aria-label', '打开菜单');
+    if (!(button instanceof HTMLButtonElement) || !(panel instanceof HTMLElement) || !(nav instanceof HTMLElement)) {
+      return null;
+    }
+    return { button, panel, nav };
   }
 
-  let navDocumentBound = false;
+  function setNavOpen(open: boolean) {
+    const parts = navParts();
+    if (!parts) return;
+    const { button, panel } = parts;
+    if (!isMobileNav()) {
+      panel.classList.remove('is-open');
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-label', '打开菜单');
+      return;
+    }
+    if (panel.classList.contains('is-open') === open) return;
+    if (open) navMotion += 1;
+    panel.classList.toggle('is-open', open);
+    button.setAttribute('aria-expanded', String(open));
+    button.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+  }
+
+  function shouldDeferNavigation(link: HTMLAnchorElement, event: MouseEvent) {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return false;
+    if (link.target && link.target !== '_self') return false;
+    if (link.hasAttribute('download') || link.dataset.astroReload !== undefined) return false;
+    if (!link.href) return false;
+    return new URL(link.href, window.location.href).origin === window.location.origin;
+  }
+
+  function isSameLocation(url: URL) {
+    return url.pathname === window.location.pathname
+      && url.search === window.location.search
+      && url.hash === window.location.hash;
+  }
+
+  async function closeThenNavigate(link: HTMLAnchorElement) {
+    const parts = navParts();
+    if (!parts) return;
+    const motion = navMotion;
+    setNavOpen(false);
+    await whenTransitionEnds(parts.panel, 'grid-template-rows');
+    if (motion !== navMotion) return;
+    const url = new URL(link.href, window.location.href);
+    if (isSameLocation(url)) return;
+    const history = link.dataset.astroHistory === 'replace' ? 'replace' : 'auto';
+    await navigate(link.href, { history, sourceElement: link });
+  }
+
+  function eventElement(target: EventTarget | null) {
+    if (target instanceof Element) return target;
+    if (target instanceof Node) return target.parentElement;
+    return null;
+  }
 
   function bindNav() {
-    const button = document.getElementById('nav-toggle');
-    const nav = document.getElementById('site-nav');
-    if (!button || !nav || button.dataset.bound === 'true') return;
+    const parts = navParts();
+    if (!parts || parts.button.dataset.bound === 'true') return;
+    const { button, panel, nav } = parts;
     button.dataset.bound = 'true';
 
     button.addEventListener('click', () => {
-      const open = nav.classList.contains('hidden');
-      nav.classList.toggle('hidden', !open);
-      nav.classList.toggle('flex', open);
-      button.setAttribute('aria-expanded', String(open));
-      button.setAttribute('aria-label', open ? '关闭菜单' : '打开菜单');
+      if (!isMobileNav()) return;
+      setNavOpen(!panel.classList.contains('is-open'));
+    });
+
+    nav.addEventListener('click', (event) => {
+      if (!isMobileNav() || !panel.classList.contains('is-open')) return;
+      const link = eventElement(event.target)?.closest('a');
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if (!shouldDeferNavigation(link, event)) {
+        setNavOpen(false);
+        return;
+      }
+      event.preventDefault();
+      void closeThenNavigate(link);
     });
 
     if (navDocumentBound) return;
     navDocumentBound = true;
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeMobileNav();
+      if (event.key === 'Escape') setNavOpen(false);
     });
 
-    document.addEventListener('click', (event) => {
-      const currentNav = document.getElementById('site-nav');
-      const currentButton = document.getElementById('nav-toggle');
-      if (!currentNav || !currentButton || currentNav.classList.contains('hidden')) return;
-      const target = event.target;
-      if (target instanceof Node && !currentNav.contains(target) && !currentButton.contains(target)) {
-        closeMobileNav();
-      }
+    window.matchMedia(mobileNavQuery).addEventListener('change', (event) => {
+      if (!event.matches) setNavOpen(false);
     });
+
+    // Capture runs before the client router, so an outside link waits for the collapse.
+    document.addEventListener('click', (event) => {
+      if (!isMobileNav()) return;
+      const current = navParts();
+      if (!current || !current.panel.classList.contains('is-open')) return;
+      const element = eventElement(event.target);
+      if (!element) return;
+      if (current.panel.contains(element) || current.button.contains(element)) return;
+      const link = element.closest('a');
+      if (link instanceof HTMLAnchorElement && shouldDeferNavigation(link, event)) {
+        event.preventDefault();
+        void closeThenNavigate(link);
+        return;
+      }
+      setNavOpen(false);
+    }, true);
   }
 
   function onPageLoad() {
     bindNav();
     syncNav();
-    closeMobileNav();
+    setNavOpen(false);
   }
 
   document.addEventListener('astro:page-load', onPageLoad);

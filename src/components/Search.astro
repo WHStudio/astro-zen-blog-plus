@@ -5,8 +5,8 @@
   </svg>
 </button>
 
-<div id="search-modal" class="fixed inset-0 z-50 flex items-start justify-center pt-24 opacity-0 invisible transition-all duration-200 pointer-events-none bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden>
-  <div class="flex items-start bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 flex-col shadow-2xl transition-all duration-200 scale-95 opacity-0">
+<div id="search-modal" class="search-modal fixed inset-0 z-50 flex items-start justify-center pt-24 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden>
+  <div class="search-dialog flex items-start bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 flex-col shadow-2xl">
     <div class="mb-4 flex w-full items-center justify-between gap-4">
       <h2 id="search-title" class="text-lg font-semibold text-gray-900 dark:text-white">搜索</h2>
       <button id="close-search" type="button" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" aria-label="关闭搜索">关闭</button>
@@ -19,6 +19,8 @@
 </div>
 
 <script>
+  import { navigate } from 'astro:transitions/client'
+  import { whenTransitionEnds } from '../scripts/motion'
   import { escapeHtml, highlightText } from '../utils/search'
 
   type SearchEntry = {
@@ -74,48 +76,72 @@
     const searchModal = document.getElementById('search-modal')
     const searchButton = document.getElementById('search-button')
     const closeButton = document.getElementById('close-search')
-    const panel = searchModal?.querySelector(':scope > div')
-    if (!searchInput || !searchResults || !searchModal || !searchButton || !panel) return
+    const panel = searchModal?.querySelector('.search-dialog')
+    if (!searchInput || !searchResults || !searchModal || !searchButton || !(panel instanceof HTMLElement)) return
 
     abortController = new AbortController()
     const { signal } = abortController
     let debounceTimer: ReturnType<typeof setTimeout> | undefined
-
-    function setOpen(open: boolean) {
-      searchModal.hidden = !open
-      searchModal.classList.toggle('opacity-0', !open)
-      searchModal.classList.toggle('invisible', !open)
-      searchModal.classList.toggle('pointer-events-none', !open)
-      searchModal.classList.toggle('opacity-100', open)
-      searchModal.classList.toggle('visible', open)
-      searchModal.classList.toggle('pointer-events-auto', open)
-      panel.classList.toggle('scale-95', !open)
-      panel.classList.toggle('opacity-0', !open)
-      panel.classList.toggle('scale-100', open)
-      panel.classList.toggle('opacity-100', open)
-      searchButton.setAttribute('aria-expanded', String(open))
-    }
+    let closeGeneration = 0
+    let openFrame = 0
+    let activeClose: Promise<void> | null = null
 
     function openModal() {
+      if (searchModal.classList.contains('is-open')) {
+        searchInput.focus()
+        return
+      }
+      closeGeneration += 1
+      activeClose = null
       lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
-      setOpen(true)
-      searchInput.focus()
+      searchModal.hidden = false
+      searchModal.classList.remove('is-open')
+      searchButton.setAttribute('aria-expanded', 'true')
+      const frame = ++openFrame
+      // Commit the closed state before opening, otherwise the browser skips the transition.
+      requestAnimationFrame(() => {
+        if (signal.aborted || frame !== openFrame || searchModal.hidden) return
+        void searchModal.offsetWidth
+        requestAnimationFrame(() => {
+          if (signal.aborted || frame !== openFrame || searchModal.hidden) return
+          searchModal.classList.add('is-open')
+          searchInput.focus()
+        })
+      })
       loadSearchData()
         .then(() => {
-          if (signal.aborted || searchModal.hidden) return
+          if (signal.aborted || !searchModal.classList.contains('is-open')) return
           if (searchInput.value.trim()) handleSearch()
         })
         .catch(() => {
-          if (signal.aborted || searchModal.hidden) return
+          if (signal.aborted || !searchModal.classList.contains('is-open')) return
           searchResults.innerHTML = message('搜索索引加载失败')
         })
     }
 
     function closeModal(restoreFocus = true) {
-      setOpen(false)
-      searchInput.value = ''
-      searchResults.innerHTML = message(emptyMessage)
-      if (restoreFocus) lastFocus?.focus()
+      openFrame += 1
+      if (activeClose) return activeClose
+      if (!searchModal.classList.contains('is-open')) {
+        const wasShown = !searchModal.hidden
+        searchModal.hidden = true
+        searchButton.setAttribute('aria-expanded', 'false')
+        if (wasShown && restoreFocus) lastFocus?.focus()
+        return Promise.resolve()
+      }
+      const generation = closeGeneration
+      searchModal.classList.remove('is-open')
+      searchButton.setAttribute('aria-expanded', 'false')
+      const pending = whenTransitionEnds(panel, 'transform').then(() => {
+        if (activeClose === pending) activeClose = null
+        if (generation !== closeGeneration) return
+        searchModal.hidden = true
+        searchInput.value = ''
+        searchResults.innerHTML = message(emptyMessage)
+        if (restoreFocus) lastFocus?.focus()
+      })
+      activeClose = pending
+      return pending
     }
 
     function displayResults(results: Array<SearchEntry & { matchedTitle: string; matchedDescription: string; matchedContent: string }>) {
@@ -177,7 +203,22 @@
     closeButton?.addEventListener('click', () => closeModal(), { signal })
     searchResults.addEventListener('click', (event) => {
       const target = event.target
-      if (target instanceof Element && target.closest('a')) closeModal(false)
+      if (!(target instanceof Element)) return
+      const link = target.closest('a')
+      if (!(link instanceof HTMLAnchorElement)) return
+      const modified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
+      const external = (link.target && link.target !== '_self') || link.origin !== window.location.origin
+      if (modified || external || link.hasAttribute('download')) {
+        void closeModal(false)
+        return
+      }
+      event.preventDefault()
+      const href = link.href
+      const history = link.dataset.astroHistory === 'replace' ? 'replace' : 'auto'
+      void closeModal(false).then(() => {
+        if (searchModal.classList.contains('is-open') || signal.aborted) return
+        return navigate(href, { history, sourceElement: link })
+      })
     }, { signal })
     searchModal.addEventListener('click', (event) => {
       if (event.target === searchModal) closeModal()
