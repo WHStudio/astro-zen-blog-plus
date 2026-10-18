@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../config';
+import { formatZonedISODate } from '../utils/date';
+import { postHref } from '../utils/paths';
 import { filterPublishedPosts, getAllTags } from '../utils/posts';
 import { escapeXml } from '../utils/xml';
 
@@ -24,10 +26,10 @@ export const GET: APIRoute = async () => {
       priority: '0.5',
     })),
     ...publishedPosts.map((post) => ({
-      loc: absolute(`/blog/${post.id}/`),
+      loc: absolute(`${postHref(post.id)}/`),
       changefreq: 'weekly',
       priority: '0.8',
-      lastmod: (post.data.updated ?? post.data.created).toISOString().split('T')[0],
+      lastmod: formatZonedISODate(post.data.updated ?? post.data.created, siteConfig.timezone),
     })),
   ];
 

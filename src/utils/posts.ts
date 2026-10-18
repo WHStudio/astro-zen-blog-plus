@@ -60,12 +60,8 @@ export function filterPosts(posts: CollectionEntry<'blog'>[], filter: PostFilter
   return filteredPosts;
 }
 
-export function getPostsByTag(posts: CollectionEntry<'blog'>[], tag: string): CollectionEntry<'blog'>[] {
-  return posts.filter(post => 
-    post.data.tags?.includes(tag) &&
-    !post.data.hidden &&
-    isPublished(post.data.created)
-  );
+export function getPostsByTag(posts: CollectionEntry<'blog'>[], tag: string, now = new Date()): CollectionEntry<'blog'>[] {
+  return filterPublishedPosts(posts, now).filter((post) => post.data.tags?.includes(tag));
 }
 
 export function getAllTags(posts: CollectionEntry<'blog'>[]): string[] {
@@ -114,6 +110,8 @@ export function getWordCount(content: string | undefined): number {
     .replace(/~~([^~]+)~~/g, '$1')
     // 移除 HTML 标签
     .replace(/<[^>]*>/g, '')
+    // 移除数学公式，避免把 LaTeX 源码算进字数
+    .replace(/\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$[^$\n]+\$/g, '')
     // 移除多余的空白字符，但保留单个空格
     .replace(/\s+/g, ' ')
     .trim();

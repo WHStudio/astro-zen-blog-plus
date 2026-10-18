@@ -68,9 +68,15 @@ const imageUrl = image
     </script>
     </head>
   <body class="min-h-screen bg-white dark:bg-gray-900">
+    <a
+      href="#content"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-gray-900 focus:shadow-lg dark:focus:bg-gray-800 dark:focus:text-white"
+    >
+      跳到主要内容
+    </a>
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <Header />
-      <main class="py-12" transition:animate={slide({ duration: '.3s' })}>
+      <main id="content" class="py-12" transition:animate={slide({ duration: '.3s' })}>
         <slot />
       </main>
       <Footer />

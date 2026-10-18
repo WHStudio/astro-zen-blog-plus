@@ -1,4 +1,4 @@
-<button id="search-button" type="button" class="text-gray-700 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white" aria-label="搜索" aria-controls="search-modal" aria-expanded="false">
+<button id="search-button" type="button" class="text-gray-700 dark:text-gray-100 hover:text-gray-900 dark:hover:text-white" aria-label="搜索" aria-controls="search-modal" aria-expanded="false" title="搜索（/）">
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <circle cx="11" cy="11" r="8"></circle>
     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -12,7 +12,7 @@
       <button id="close-search" type="button" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white" aria-label="关闭搜索">关闭</button>
     </div>
     <input type="text" id="search-input" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-4" placeholder="搜索标题、描述或正文" autocomplete="off" aria-label="搜索关键词" />
-    <div id="search-results" class="max-h-[500px] overflow-y-auto w-full">
+    <div id="search-results" class="max-h-[500px] overflow-y-auto w-full" aria-live="polite">
       <div class="p-4 text-gray-500 dark:text-gray-400">输入关键词开始搜索</div>
     </div>
   </div>
@@ -26,6 +26,7 @@
     description: string
     tags: string[]
     slug: string
+    href: string
     content: string
   }
 
@@ -108,16 +109,16 @@
       if (restoreFocus) lastFocus?.focus()
     }
 
-    function displayResults(results: Array<SearchEntry & { matchedTitle: string; matchedContent: string }>) {
+    function displayResults(results: Array<SearchEntry & { matchedTitle: string; matchedDescription: string; matchedContent: string }>) {
       if (results.length === 0) {
         searchResults.innerHTML = message(notFoundMessage)
         return
       }
 
       searchResults.innerHTML = `<div class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border-b dark:border-gray-600">找到 ${results.length} 个结果</div>` + results.map((post) => `
-        <a href="/blog/${escapeHtml(post.slug)}" class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 hover:rounded transition-all duration-200">
+        <a href="${escapeHtml(post.href)}" class="block p-4 hover:bg-gray-100 dark:hover:bg-gray-700 hover:rounded transition-all duration-200">
           <h3 class="font-medium text-gray-900 dark:text-white">${post.matchedTitle}</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">${escapeHtml(post.description)}</p>
+          ${post.matchedDescription ? `<p class="text-sm text-gray-500 dark:text-gray-400">${post.matchedDescription}</p>` : ''}
           ${post.matchedContent ? `<p class="text-sm text-gray-600 dark:text-gray-300 mt-2 font-mono">${post.matchedContent}</p>` : ''}
           ${post.tags.map((tag) => `<span class="inline-block bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded-full mt-2 mr-2">${escapeHtml(tag)}</span>`).join('')}
         </a>
@@ -151,6 +152,7 @@
         return [{
           ...post,
           matchedTitle: highlightText(post.title, query),
+          matchedDescription: highlightText(post.description, query),
           matchedContent: matchedContent ? highlightText(matchedContent, query) : '',
         }]
       }).slice(0, 50)
@@ -172,6 +174,18 @@
       if (event.target === searchModal) closeModal()
     }, { signal })
     document.addEventListener('keydown', (event) => {
+      const target = event.target
+      const typing = target instanceof HTMLElement && (
+        target.isContentEditable ||
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT'
+      )
+      if (event.key === '/' && !typing && searchModal.hidden) {
+        event.preventDefault()
+        openModal()
+        return
+      }
       if (searchModal.hidden) return
       if (event.key === 'Escape') {
         event.preventDefault()
@@ -192,9 +206,15 @@
       }
     }, { signal })
 
-    loadSearchData().catch(() => {
-      searchResults.innerHTML = message('搜索索引加载失败')
-    })
+    loadSearchData()
+      .then(() => {
+        if (signal.aborted) return
+        if (searchInput.value.trim()) handleSearch()
+      })
+      .catch(() => {
+        if (signal.aborted) return
+        searchResults.innerHTML = message('搜索索引加载失败')
+      })
   }
 
   document.addEventListener('astro:page-load', initialize)
