@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "astro-zen-blog-plus",
+  // Pre-rendered Astro site. Workers Static Assets serves dist; there is no Worker script.
+  "compatibility_date": "2026-10-18",
+  "workers_dev": true,
+  "preview_urls": false,
+  // Workers Logs, traces, and Logpush are billed separately. Keep them off.
+  "logpush": false,
+  "upload_source_maps": false,
+  "observability": {
+    "enabled": false,
+    "logs": {
+      "enabled": false,
+      "invocation_logs": false,
+      "persist": false
+    },
+    "traces": {
+      "enabled": false,
+      "persist": false
+    }
+  },
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

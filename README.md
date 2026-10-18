@@ -117,15 +117,16 @@ pnpm new-post 文件名
    }
    ```
 
-2. 或者 无服务器部署：
+2. 或者部署到 Cloudflare Workers：
 
-   构建命令 `pnpm build`，输出 `dist`。
+   ```bash
+   pnpm exec wrangler login
+   pnpm deploy
+   ```
 
-   - [Cloudflare Pages](https://pages.cloudflare.com/)
+   `pnpm deploy` 会先构建，再把 `dist` 发布到 Worker `astro-zen-blog-plus`。配置在 `wrangler.jsonc`：静态页面由 Workers Static Assets 提供，未知地址返回站点自己的 404 页面。观测、日志、追踪和 Logpush 保持关闭。
 
-   - [Vercel](https://vercel.com/)
-
-   - [netlify](https://netlify.com/)
+   也可以部署到 [Vercel](https://vercel.com/) 或 [Netlify](https://netlify.com/)。构建命令仍是 `pnpm build`，输出目录是 `dist`。
 
 3. 快捷脚本（可选）
 
