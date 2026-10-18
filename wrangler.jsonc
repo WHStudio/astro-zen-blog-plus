@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "astro-zen-blog-plus",
+  // Set this to today's date
+  "compatibility_date": "2026-10-18",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+  // `wrangler preview` requires this block. Static assets stay at the top level.
+  "previews": {}
+}
