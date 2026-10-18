@@ -217,6 +217,21 @@
   vertical-align: middle;
 }
 
+/* remark-gfm 用单元格的 align 属性表达列对齐。
+   排版插件把 th/td 设成 text-align: start，表头样式又写成 left，都会盖掉它。
+   未写对齐的单元格仍保持左对齐。 */
+.prose :is(th, td)[align='left'] {
+  text-align: left;
+}
+
+.prose :is(th, td)[align='center'] {
+  text-align: center;
+}
+
+.prose :is(th, td)[align='right'] {
+  text-align: right;
+}
+
 .prose table thead th {
   padding: 0.625rem 1rem !important;
   line-height: 1.6;
