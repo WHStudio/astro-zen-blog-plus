@@ -73,6 +73,9 @@ if (redirect) {
     包含 {tag} 标签的博客{currentPage > 1 && ` - 第 ${currentPage} 页`}
   </h1>
   <section>
+    {posts.length === 0 && (
+      <p class="text-gray-600 dark:text-gray-300">这个标签下还没有已发布的文章。</p>
+    )}
     {posts.map((post) => <BlogPreview post={post} />)}
   </section>
   <Pagination

@@ -1,3 +1,14 @@
+export function toSearchText(markdown: string | undefined): string {
+  if (!markdown) return '';
+  return markdown
+    .replace(/!\[[^\]]*]\([^)]*\)/g, ' ')
+    .replace(/!\[[^\]]*]\[[^\]]*]/g, ' ')
+    .replace(/<img\b[^>]*>/gi, ' ')
+    .replace(/<(video|audio)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')

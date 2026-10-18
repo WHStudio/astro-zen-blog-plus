@@ -58,12 +58,17 @@ function getPageNumbers() {
 }
 
 const pageNumbers = getPageNumbers();
+const linkClass = 'px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors';
 ---
 
+{totalPages > 1 && (
 <nav class="flex flex-col items-center gap-4 mt-12" aria-label="分页">
-    <!-- 分页导航 -->
   <div class="flex items-center gap-2 flex-wrap justify-center">
-    <!-- 页码 -->
+    {currentPage > 1 ? (
+      <a href={getPageUrl(currentPage - 1)} rel="prev" class={linkClass}>上一页</a>
+    ) : (
+      <span class="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">上一页</span>
+    )}
     {pageNumbers.map((pageNum) => {
       if (pageNum === '...') {
         return (
@@ -81,12 +86,18 @@ const pageNumbers = getPageNumbers();
         return (
           <a
             href={getPageUrl(pageNum as number)}
-            class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            class={linkClass}
           >
             {pageNum}
           </a>
         );
       }    })}
+    {currentPage < totalPages ? (
+      <a href={getPageUrl(currentPage + 1)} rel="next" class={linkClass}>下一页</a>
+    ) : (
+      <span class="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">下一页</span>
+    )}
   </div>
 </nav>
+)}
 

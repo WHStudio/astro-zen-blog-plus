@@ -14,6 +14,10 @@ const tagCounts = tags.map(tag => ({
 <BaseLayout title="标签" description="按标签浏览已发布的文章">
   <h1 class="text-4xl font-bold mb-8 text-gray-900 dark:text-white">标签</h1>
   
+  {tagCounts.length === 0 && (
+    <p class="text-gray-600 dark:text-gray-300">还没有标签。</p>
+  )}
+
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
     {tagCounts.map(({ name, count }) => (
       <a

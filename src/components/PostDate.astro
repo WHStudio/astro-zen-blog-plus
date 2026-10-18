@@ -1,4 +1,13 @@
 ---
+import { siteConfig } from '../config';
+import {
+  formatDate,
+  formatDateTime,
+  formatDateTimeShort,
+  formatDateTimeWithoutYear,
+  formatDateWithoutYear,
+} from '../utils/date';
+
 interface Props {
   date: Date;
   showTime?: boolean;
@@ -7,6 +16,16 @@ interface Props {
 }
 
 const { date, showTime = false, short = false, hideYear = false } = Astro.props;
+const timeZone = siteConfig.timezone;
+const label = showTime
+  ? hideYear
+    ? formatDateTimeWithoutYear(date, timeZone)
+    : short
+      ? formatDateTimeShort(date, timeZone)
+      : formatDateTime(date, timeZone)
+  : hideYear
+    ? formatDateWithoutYear(date, timeZone)
+    : formatDate(date, timeZone);
 ---
 
 <time 
@@ -16,7 +35,7 @@ const { date, showTime = false, short = false, hideYear = false } = Astro.props;
   data-short={short}
   data-hide-year={hideYear}
 >
-  {date.toISOString()}
+  {label}
 </time>
 
 <script>

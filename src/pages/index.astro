@@ -8,10 +8,14 @@ import { siteConfig } from '../config'
 
 const posts = await getCollection('blog')
 
-// Configure homepage post filtering
-const homePagePosts = filterPosts(posts, {
-  ...siteConfig.homepage,
+const publishedForHome = filterPosts(posts, {
+  tags: siteConfig.homepage.tags,
+  excludeTags: siteConfig.homepage.excludeTags,
 })
+const homePagePosts = siteConfig.homepage.maxPosts
+  ? publishedForHome.slice(0, siteConfig.homepage.maxPosts)
+  : publishedForHome
+const hasMorePosts = publishedForHome.length > homePagePosts.length
 ---
 
 <BaseLayout title={siteConfig.title}>
@@ -22,6 +26,14 @@ const homePagePosts = filterPosts(posts, {
   </div>
 
   <section>
+    {homePagePosts.length === 0 && (
+      <p class="text-gray-600 dark:text-gray-300">还没有已发布的文章。</p>
+    )}
     {homePagePosts.map((post) => <BlogPreview post={post} />)}
   </section>
+  {hasMorePosts && (
+    <p class="mt-2">
+      <a href="/blog" class="font-medium text-primary-700 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300">查看全部文章</a>
+    </p>
+  )}
 </BaseLayout>

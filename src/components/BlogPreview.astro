@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import PostDate from './PostDate.astro';
 import PostTags from './PostTags.astro';
 import CoverImage from './CoverImage.astro';
+import { postHref } from '../utils/paths';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -10,11 +11,12 @@ interface Props {
 
 const { post } = Astro.props;
 const { title, description, created, updated, tags, image } = post.data;
+const href = postHref(post.id);
 ---
 
 <article class="mb-12 p-6 bg-gray-50 dark:bg-gray-800/60 rounded-xl shadow-md hover:shadow-xl dark:shadow-gray-700/30 dark:hover:shadow-2xl dark:hover:shadow-primary-500/20 border border-gray-200 dark:border-gray-700 transition-all duration-200">
   {image && (
-    <a href={`/blog/${post.id}`} class="block mb-4">
+    <a href={href} class="block mb-4">
       <CoverImage
         src={image}
         alt={title}
@@ -25,7 +27,7 @@ const { title, description, created, updated, tags, image } = post.data;
   )}
   <header>
     <h2 class="text-xl font-bold mb-2">
-      <a href={`/blog/${post.id}`} class="text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
+      <a href={href} class="text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400">
         {title}
       </a>
     </h2>

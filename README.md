@@ -91,7 +91,7 @@ export const siteConfig: SiteConfig = {
 pnpm new-post 文件名
 ```
 
-你可以通过修改 `scripts/add-post.js` 定制新文章的模板。已存在的文件不会被覆盖。`hidden: true` 或创建时间晚于构建时间的文章不会生成页面，也不会进入列表、搜索和站点地图。
+你可以通过修改 `scripts/add-post.js` 定制新文章的模板。已存在的文件不会被覆盖。`hidden: true` 的文章仍会生成页面，知道地址的人可以直接打开，但不会进入首页、列表、归档、标签、搜索和站点地图。创建时间晚于构建时间的文章不会生成页面。
 
 ## 构建和部署
 
