@@ -46,6 +46,17 @@ assert.match(post, /上一篇|下一篇/);
 assert.match(post, /2025年6月18日 02:30/);
 assert.match(post, /katex\.[^"]+\.css/);
 assert.match(post, /src="https:\/\/www\.todaybing\.com\/api\/today\/cn"/);
+assert.match(post, /alt="必应壁纸"/);
+assert.match(post, /width="1920"/);
+assert.match(post, /height="1080"/);
+assert.match(post, /loading="lazy"/);
+assert.match(post, /<label><input type="checkbox"/);
+const katexHref = post.match(/href="(\/[^"]*katex\.[^"]+\.css)"/);
+assert.ok(katexHref, 'math post should link a katex stylesheet');
+const katexCss = read(katexHref[1].slice(1));
+assert.match(katexCss, /font-display:swap/);
+assert.doesNotMatch(katexCss, /font-display:\s*block/);
+assert.match(post, /#bdc4cc/i);
 assert.doesNotMatch(post, /__ASTRO_IMAGE_/);
 
 const readme = read('blog/readme/index.html');

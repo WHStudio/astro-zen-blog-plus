@@ -100,6 +100,15 @@
       lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
       setOpen(true)
       searchInput.focus()
+      loadSearchData()
+        .then(() => {
+          if (signal.aborted || searchModal.hidden) return
+          if (searchInput.value.trim()) handleSearch()
+        })
+        .catch(() => {
+          if (signal.aborted || searchModal.hidden) return
+          searchResults.innerHTML = message('搜索索引加载失败')
+        })
     }
 
     function closeModal(restoreFocus = true) {
@@ -205,16 +214,6 @@
         first.focus()
       }
     }, { signal })
-
-    loadSearchData()
-      .then(() => {
-        if (signal.aborted) return
-        if (searchInput.value.trim()) handleSearch()
-      })
-      .catch(() => {
-        if (signal.aborted) return
-        searchResults.innerHTML = message('搜索索引加载失败')
-      })
   }
 
   document.addEventListener('astro:page-load', initialize)
