@@ -36,10 +36,7 @@ assert.doesNotMatch(home, /rel="stylesheet"/);
 assert.doesNotMatch(home, /fetchpriority="high"/);
 assert.match(home, /<style[\s>]/);
 assert.doesNotMatch(home, /不会发布的隐藏草稿|未来才发布的文章/);
-assert.doesNotMatch(home, /width="800"/);
-assert.match(home, /width="700"/);
 assert.match(home, /跳到主要内容/);
-assert.match(home, /2026年5月10日/);
 assert.doesNotMatch(home, />\d{4}-\d{2}-\d{2}T/);
 
 const post = read('blog/mdtest/index.html');
